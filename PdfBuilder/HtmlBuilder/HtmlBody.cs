@@ -12,7 +12,7 @@ namespace PdfBuilder.HtmlBuilder
         public HtmlBody()
         {
             // Start with a basic HTML structure that works for IronPdf
-            sb_.Append("<body><div style=\"font-size: 16pt;\"<p>");
+            sb_.Append("<body><div style=\"font-size:16pt;\"><p>");
         }
 
         public PdfErrors AddText(string text)
@@ -38,7 +38,7 @@ namespace PdfBuilder.HtmlBuilder
         {
             if (justifying_)
             {
-                sb_.Append("/div>");
+                sb_.Append("</div>");
                 justifying_ = false;
             }
             return PdfErrors.None;
@@ -56,7 +56,7 @@ namespace PdfBuilder.HtmlBuilder
             indentation_ += increment;
             if (indentation_ != 0)
             {
-                sb_.Append($"<div style=\"left-padding:{25 * indentation_}px;\">");
+                sb_.Append($"<div style=\"padding-left:{25 * indentation_}px;\">");
             }
 
             return PdfErrors.None;

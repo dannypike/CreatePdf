@@ -17,8 +17,8 @@ namespace PdfBuilder
         {
             var services = new ServiceCollection()
                 .AddLogging(builder => builder
-                    .SetMinimumLevel(LogLevel.Trace)    // Control the debug levels using log4net config file
-                    .AddConsole(/*options => options.LogToStandardErrorThreshold = LogLevel.Debug*/)
+                    .SetMinimumLevel(LogLevel.Trace)
+                    .AddConsole(options => options.LogToStandardErrorThreshold = LogLevel.Trace)
                     );
             services.Add(new ServiceDescriptor(typeof(IHtmlBodyFactory), typeof(HtmlBodyFactory), ServiceLifetime.Singleton));
             DI = services.BuildServiceProvider();
@@ -93,7 +93,9 @@ namespace PdfBuilder
                     }
                     else
                     {
-                        if ((errCode = html.AddText(line)) != PdfErrors.None)
+                        if ((errCode = html.AddText(line)) != PdfErrors.None
+                            || (errCode = html.AddText(" ")) != PdfErrors.None
+                            )
                         {
                             // Assume that the AddText() method has already output a suitable message
                             return errCode;
@@ -232,7 +234,7 @@ namespace PdfBuilder
                 { ".fill", OnFill },
                 { ".nofill", OnNoFill },
                 { ".regular", OnRegular },
-                { ".italic", OnItalic },
+                { ".italics", OnItalic },
                 { ".bold", OnBold },
                 { ".indent", OnIndent },
             };
