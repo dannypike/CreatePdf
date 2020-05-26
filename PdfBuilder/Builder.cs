@@ -1,15 +1,36 @@
-﻿using PdfBuilder.Abstractions;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using PdfBuilder.Abstractions;
+using PdfBuilder.HtmlBuilder;
+using StructureMap;
 using System;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
-using System.Text;
+using System.Linq;
 
 namespace PdfBuilder
 {
-    public class Builder : IBuilder
+    public class Builder
     {
-        /// <see cref="IBuilder"/>
+        private IServiceProvider DI { get; set; }
+
+        public Builder()
+        {
+            var services = new ServiceCollection()
+                .AddLogging(builder => builder
+                    .SetMinimumLevel(LogLevel.Trace)    // Control the debug levels using log4net config file
+                    .AddConsole(/*options => options.LogToStandardErrorThreshold = LogLevel.Debug*/)
+                    );
+            services.Add(new ServiceDescriptor(typeof(IHtmlBodyFactory), typeof(HtmlBodyFactory), ServiceLifetime.Singleton));
+            DI = services.BuildServiceProvider();
+        }
+
+        /// <summary>
+        /// Reads PDF command from the inputFile and produces a PDF file as the output
+        /// </summary>
+        /// <param name="outputFile"></param>
+        /// <param name="inputFile"></param>
+        /// <returns>An error result, <see cref="PdfErrors"> for details</see></returns>
         public PdfErrors Create(string outputFile, string inputFile)
         {
             try
@@ -19,32 +40,35 @@ namespace PdfBuilder
                     return PdfErrors.OutputFileAlreadyExists;
                 }
 
-                var rdr = new IronPdf.HtmlToPdf();
-                rdr.PrintOptions.PaperSize = IronPdf.PdfPrintOptions.PdfPaperSize.A4;
-                var text = @"<h1>My PDF Document</h1>
-<p>This is my <em>very first</em> pdf document, and the output is formatted really well. While this
-paragraph is not filled, the following one has automatic filling set:
-</p><p style=""text-align: justify;padding-left: 50px;"">
-“Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
-nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa
-qui officia deserunt mollit anim id est laborum.”
-</p><p>
-Well that was <strong>exciting</strong>, good luck!
-</p>
-";
-                const int count = 8;
-                var sb = new StringBuilder(count * text.Length + 256);
-                sb.Append(@"<body><div style=""font-size:16pt;"">");
-                for (var ii = 0; ii < count; ++ii)
+                // Without a comprehensive syntax, I am making the following
+                // assumptions from the example that was supplied and adding
+                // some of my own that seem like a good idea:
+                //
+                // * It is OK to assume single-threaded only (easier to code in the time available).
+                // * It is OK to use HTML as an intermediate syntax (I am not familiar with the PDF format definition).
+                // * All commands are on their own line and start with a '.' (easier to parse).
+                // * Commands are not case-sensitive (more user-friendly).
+                // * Extra blank lines and leading and trailing whitespace should be ignored (more user-friendly).
+
+                var lines = File.ReadAllLines(inputFile)
+                    .Select(line => line.Trim())
+                    .Where(line => 0 < line.Length)
+                    ;
+
+                // Build the Html from the commands and text in the input file
+                var html = DI.GetRequiredService<IHtmlBodyFactory>().Create();
+
+                foreach (var line in lines)
                 {
-                    sb.Append(text);
+                    Debug.Assert(0 < line.Length);  // Just in case someone changes the LINQ above!
+                    if ('.' == line[0])
+                    {
+
+                    }
                 }
-                sb.Append(@"</div></body>");
-                var pdf = rdr.RenderHtmlAsPdf(sb.ToString());
-                pdf.SaveAs(outputFile);
+
+                //var pdf = rdr.RenderHtmlAsPdf(sb.ToString());
+                //pdf.SaveAs(outputFile);
 
                 return PdfErrors.NotImplemented;
             }

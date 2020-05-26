@@ -19,6 +19,6 @@ namespace Tests
             Assert.AreEqual(PdfErrors.OutputFileAlreadyExists, pdfBuilder_.Create(outFile, inFile));
         }
 
-        private IBuilder pdfBuilder_;
+        private Builder pdfBuilder_;
     }
 }
