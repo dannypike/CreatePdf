@@ -9,7 +9,7 @@ namespace PdfBuilder.Abstractions
         /// </summary>
         /// <param name="outputFile"></param>
         /// <param name="inputFile"></param>
-        /// <returns>true if it worked, otherwise, consult the error log</returns>
-        bool Create(string outputFile, string inputFile);
+        /// <returns>An error result, <see cref="PdfErrors"> for details</see></returns>
+        PdfErrors Create(string outputFile, string inputFile);
     }
 }

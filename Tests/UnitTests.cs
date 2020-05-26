@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using PdfBuilder;
 using PdfBuilder.Abstractions;
+using System.IO;
 
 namespace Tests
 {
@@ -12,10 +13,10 @@ namespace Tests
             pdfBuilder_ = new Builder();
         }
 
-        [TestCase("..\\output\\sample1.pdf", "..\\samples\\sample1.txt")]
-        public void Test1(string outFile, string inFile)
+        [TestCase(@"..\..\..\..\outputs\outputAlreadyExists.pdf", @"..\..\..\..\samples\outputAlreadyExists.txt")]
+        public void DoNotOverwriteExistingPdf(string outFile, string inFile)
         {
-            Assert.AreEqual(true, pdfBuilder_.Create(outFile, inFile));
+            Assert.AreEqual(PdfErrors.OutputFileAlreadyExists, pdfBuilder_.Create(outFile, inFile));
         }
 
         private IBuilder pdfBuilder_;
