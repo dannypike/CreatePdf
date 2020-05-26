@@ -1,8 +1,25 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="PdfBuilder.Abstractions\**" />
+    <Compile Remove="PdfBuilder\**" />
+    <Compile Remove="Tests\**" />
+    <EmbeddedResource Remove="PdfBuilder.Abstractions\**" />
+    <EmbeddedResource Remove="PdfBuilder\**" />
+    <EmbeddedResource Remove="Tests\**" />
+    <None Remove="PdfBuilder.Abstractions\**" />
+    <None Remove="PdfBuilder\**" />
+    <None Remove="Tests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="PdfBuilder.Abstractions\PdfBuilder.Abstractions.csproj" />
+    <ProjectReference Include="PdfBuilder\PdfBuilder.csproj" />
+  </ItemGroup>
 
 </Project>
