@@ -24,7 +24,7 @@ namespace PdfBuilder
                 var text = @"<h1>My PDF Document</h1>
 <p>This is my <em>very first</em> pdf document, and the output is formatted really well. While this
 paragraph is not filled, the following one has automatic filling set:
-</p><p style=""text-align: justify;indent: 50px;"">
+</p><p style=""text-align: justify;padding-left: 50px;"">
 “Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
 incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
 nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
