@@ -8,25 +8,15 @@ using System.Threading.Tasks;
 
 namespace Tests
 {
-    public class UnitTests
+    public class TestBuilder
     {
-        const string Sample1Txt = @"..\..\..\..\samples\sample1.txt";
-        const string Sample1Pdf = @"..\..\..\..\outputs\sample1.pdf";
-        const string Sample8Txt = @"..\..\..\..\samples\sample8.txt";
-        const string Sample8Pdf = @"..\..\..\..\outputs\sample8.pdf";
-        const string AlreadyExistsInput = @"..\..\..\..\samples\outputAlreadyExists.txt";
-        const string AlreadyExistsOutput = @"..\..\..\..\outputs\outputAlreadyExists.pdf";
-        const string ThreePagesTxt = @"..\..\..\..\samples\threePages.txt";
-        const string ThreePagesPdf = @"..\..\..\..\outputs\threePages.pdf";
-        const string SampleThreePagesPdf = @"..\..\..\..\outputs\sampleThreePages.pdf";
-
         [SetUp]
         public void Setup()
         {
             pdfBuilder_ = new Builder();
         }
 
-        [TestCase(AlreadyExistsOutput, AlreadyExistsInput
+        [TestCase(Constants.AlreadyExistsOutput, Constants.AlreadyExistsInput
             , TestName = "Do not overwrite an existing output file")]
         public async Task DoNotOverwriteExistingPdf(string outFile, string inFile)
         {
@@ -40,7 +30,7 @@ namespace Tests
             {
                 Assert.Catch<PdfDocumentException>(() =>
                 {
-                    doc.LoadFromFile(Sample1Txt);
+                    doc.LoadFromFile(Constants.Sample1Txt);
                 }, "Spire failed to throw exception on loading something that is not a PDF document");
             }
         }
@@ -50,13 +40,13 @@ namespace Tests
         {
             using (var doc = new PdfDocument())
             {
-                doc.LoadFromFile(ThreePagesPdf);
+                doc.LoadFromFile(Constants.ExistingPdf);
                 Assert.AreEqual(3, doc.Pages.Count
                     , "Spire failed to parse a valid PDF");
             }
         }
 
-        [TestCase(@"..\..\..\..\Tests\outputs\autoCreateDirectory\sample1.pdf", Sample1Txt
+        [TestCase(@"..\..\..\..\Tests\outputs\autoCreateDirectory\sample1.pdf", Constants.Sample1Txt
             , TestName = "Create output directory")]
         public async Task AutoCreateOutputDirectory(string outFile, string inFile)
         {
@@ -73,14 +63,14 @@ namespace Tests
             Assert.AreEqual(true, File.Exists(outFile), $"failed to create output file {outFile}");
         }
 
-        [TestCase(@"..\..\..\..\Tests\outputs\???invalid???\sample1.pdf", Sample1Txt
+        [TestCase(@"..\..\..\..\Tests\outputs\???invalid???\sample1.pdf", Constants.Sample1Txt
             , TestName = "Invalid directory string")]
         public async Task InvalidOutputDirectory1(string outFile, string inFile)
         {
             Assert.AreEqual(PdfErrors.InvalidOutputPath, await pdfBuilder_.Create(outFile, inFile));
         }
 
-        [TestCase(@"\\DOESNOTEXIST\sample1.pdf", Sample1Txt
+        [TestCase(@"\\DOESNOTEXIST\sample1.pdf", Constants.Sample1Txt
             , TestName = "Cannot create directory")]
         public async Task InvalidOutputDirectory2(string outFile, string inFile)
         {
@@ -88,9 +78,9 @@ namespace Tests
             Assert.AreEqual(PdfErrors.InvalidOutputPath, await pdfBuilder_.Create(outFile, inFile));
         }
 
-        [TestCase(Sample1Pdf, Sample1Txt, 1, TestName = "Sample1 is a PDF with one page")]
-        [TestCase(Sample8Pdf, Sample8Txt, 2, TestName = "Sample8 is a PDF with two pages")]
-        [TestCase(SampleThreePagesPdf, ThreePagesTxt, 3, TestName = "SampleThreePagesPdf is a PDF with three pages")]
+        [TestCase(Constants.Sample1Pdf, Constants.Sample1Txt, 1, TestName = "Sample1 is a PDF with one page")]
+        [TestCase(Constants.Sample8Pdf, Constants.Sample8Txt, 2, TestName = "Sample8 is a PDF with two pages")]
+        [TestCase(Constants.SampleThreePagesPdf, Constants.ThreePagesTxt, 3, TestName = "SampleThreePagesPdf is a PDF with three pages")]
         public async Task CheckPageCounts(string outFile, string inFile, int pageCount)
         {
             if (File.Exists(outFile))
