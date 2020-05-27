@@ -23,7 +23,8 @@ Well that was
 .bold
 exciting
 .regular
-, good luck!.large
+, good luck!
+.large
 My PDF Document
 .normal
 .paragraph

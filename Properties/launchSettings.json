@@ -2,7 +2,7 @@
   "profiles": {
     "CreatePdf": {
       "commandName": "Project",
-      "commandLineArgs": "--input=..\\..\\..\\samples\\sample8.txt --output=..\\..\\..\\outputs\\sample8.pdf"
+      "commandLineArgs": "--input=..\\..\\..\\samples\\threePages.txt --output=..\\..\\..\\outputs\\threePages.pdf"
     }
   }
 }
