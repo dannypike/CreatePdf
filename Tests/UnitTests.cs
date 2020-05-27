@@ -12,10 +12,13 @@ namespace Tests
     {
         const string Sample1Txt = @"..\..\..\..\samples\sample1.txt";
         const string Sample1Pdf = @"..\..\..\..\outputs\sample1.pdf";
+        const string Sample8Txt = @"..\..\..\..\samples\sample8.txt";
+        const string Sample8Pdf = @"..\..\..\..\outputs\sample8.pdf";
         const string AlreadyExistsInput = @"..\..\..\..\samples\outputAlreadyExists.txt";
         const string AlreadyExistsOutput = @"..\..\..\..\outputs\outputAlreadyExists.pdf";
         const string ThreePagesTxt = @"..\..\..\..\samples\threePages.txt";
         const string ThreePagesPdf = @"..\..\..\..\outputs\threePages.pdf";
+        const string SampleThreePagesPdf = @"..\..\..\..\outputs\sampleThreePages.pdf";
 
         [SetUp]
         public void Setup()
@@ -81,7 +84,29 @@ namespace Tests
             , TestName = "Cannot create directory")]
         public async Task InvalidOutputDirectory2(string outFile, string inFile)
         {
+            // Note: this may take a few seconds because Windows will look for a server that 'DOESNOTEXIST' :)
             Assert.AreEqual(PdfErrors.InvalidOutputPath, await pdfBuilder_.Create(outFile, inFile));
+        }
+
+        [TestCase(Sample1Pdf, Sample1Txt, 1, TestName = "Sample1 is a PDF with one page")]
+        [TestCase(Sample8Pdf, Sample8Txt, 2, TestName = "Sample8 is a PDF with two pages")]
+        [TestCase(SampleThreePagesPdf, ThreePagesTxt, 3, TestName = "SampleThreePagesPdf is a PDF with three pages")]
+        public async Task CheckPageCounts(string outFile, string inFile, int pageCount)
+        {
+            if (File.Exists(outFile))
+            {
+                Assert.DoesNotThrow(() => File.Delete(outFile)
+                    , $"failed to delete output file {outFile}, is it in use?");
+            }
+            Assert.AreEqual(PdfErrors.None, await pdfBuilder_.Create(outFile, inFile));
+            using (var doc = new PdfDocument())
+            {
+                await Task.Run(() =>
+                {
+                    doc.LoadFromFile(outFile);
+                    Assert.AreEqual(pageCount, doc.Pages.Count, $"{outFile} has an unexpected page count");
+                });
+            }
         }
 
         private Builder pdfBuilder_;
