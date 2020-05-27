@@ -127,6 +127,7 @@ namespace PdfBuilder
             var errCode = PdfErrors.Success;
 
             var lineIndex = 0;
+            var inBlockText = false;
             foreach (var line in lines)
             {
                 ++lineIndex;
@@ -136,6 +137,7 @@ namespace PdfBuilder
                 }
                 if (line[0] == '.')
                 {
+                    inBlockText = false;
                     var words = line.Split(delims_);
                     if (commands_.TryGetValue(words[0], out CommandHandler handler))
                     {
@@ -154,13 +156,22 @@ namespace PdfBuilder
                 }
                 else
                 {
-                    if ((errCode = html.AddText(line)) != PdfErrors.Success
-                        || (errCode = html.AddText(" ")) != PdfErrors.Success
-                        )
+                    if (inBlockText)
+                    {
+                        // This is a multi-line block of text, and so we need to insert
+                        // whitespace between the lines
+                        if ((errCode = html.AddText(" ")) != PdfErrors.Success)
+                        {
+                            // Assume that the AddText() method has already output a suitable message
+                            return errCode;
+                        }
+                    }
+                    if ((errCode = html.AddText(line)) != PdfErrors.Success)
                     {
                         // Assume that the AddText() method has already output a suitable message
                         return errCode;
                     }
+                    inBlockText = true;
                 }
             }
             return errCode;
