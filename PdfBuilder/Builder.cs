@@ -79,10 +79,10 @@ namespace PdfBuilder
                 }
 
                 var renderedHtml = html.RenderedHtml;
-                if (renderedHtml.Length == 0)
+                if (renderedHtml?.Length == 0)
                 {
                     log_?.LogWarning($"the command-file {Path.GetFullPath(inputFile)}' produced no output");
-                        return PdfErrors.EmptyOutput;
+                    return PdfErrors.EmptyOutput;
                 }
 
                 // Render the HTML as a PDF file
