@@ -65,43 +65,10 @@ namespace PdfBuilder
 
                 // Build the Html from the commands and text in the input file
                 var html = DI.GetRequiredService<IHtmlBodyFactory>().Create(DI);
-
-                var lineIndex = 0;
-                foreach (var line in lines)
+                if ((errCode = Build(Path.GetFullPath(inputFile), html, lines)) != PdfErrors.None)
                 {
-                    ++lineIndex;
-                    if (line.Length ==  0)
-                    {
-                        continue;
-                    }
-                    if (line[0] == '.')
-                    {
-                        var words = line.Split(delims_);
-                        if (commands_.TryGetValue(words[0], out CommandHandler handler))
-                        {
-                            if ((errCode = handler(html, words.Skip(1))) != PdfErrors.None)
-                            {
-                                // Assume that the handler has already output a suitable message
-                                return errCode;
-                            }
-                        }
-                        else
-                        {
-                            log_?.LogError($"unrecognized command '{words[0]}' "
-                                + $"at '{Path.GetFullPath(inputFile)}':{lineIndex}");
-                            return PdfErrors.SyntaxError;
-                        }
-                    }
-                    else
-                    {
-                        if ((errCode = html.AddText(line)) != PdfErrors.None
-                            || (errCode = html.AddText(" ")) != PdfErrors.None
-                            )
-                        {
-                            // Assume that the AddText() method has already output a suitable message
-                            return errCode;
-                        }
-                    }
+                    // Assume that the Build() method has already output a suitable message
+                    return errCode;
                 }
 
                 // Generate the HTML that has been built from the command-file
@@ -129,6 +96,57 @@ namespace PdfBuilder
                 log_?.LogError($"caught exception: {ex.Message}");
                 return PdfErrors.Exception;
             }
+        }
+
+        /// <summary>
+        /// Run through the command file lines and add HTML elements
+        /// </summary>
+        /// <param name="context">The input file context, for error messages</param>
+        /// <param name="html">the IHtmlBody being built</param>
+        /// <param name="lines">The lines in the command file</param>
+        /// <returns></returns>
+        private PdfErrors Build(string context, IHtmlBody html, IEnumerable<string> lines)
+        {
+            var errCode = PdfErrors.None;
+
+            var lineIndex = 0;
+            foreach (var line in lines)
+            {
+                ++lineIndex;
+                if (line.Length == 0)
+                {
+                    continue;
+                }
+                if (line[0] == '.')
+                {
+                    var words = line.Split(delims_);
+                    if (commands_.TryGetValue(words[0], out CommandHandler handler))
+                    {
+                        if ((errCode = handler(html, words.Skip(1))) != PdfErrors.None)
+                        {
+                            // Assume that the handler has already output a suitable message
+                            return errCode;
+                        }
+                    }
+                    else
+                    {
+                        log_?.LogError($"unrecognized command '{words[0]}' "
+                            + $"at '{context}':{lineIndex}");
+                        return PdfErrors.SyntaxError;
+                    }
+                }
+                else
+                {
+                    if ((errCode = html.AddText(line)) != PdfErrors.None
+                        || (errCode = html.AddText(" ")) != PdfErrors.None
+                        )
+                    {
+                        // Assume that the AddText() method has already output a suitable message
+                        return errCode;
+                    }
+                }
+            }
+            return errCode;
         }
 
         /// <summary>
