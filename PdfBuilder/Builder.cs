@@ -12,7 +12,7 @@ namespace PdfBuilder
 {
     public class Builder
     {
-        private IServiceProvider DI { get; set; }
+        public IServiceProvider DI { get; set; }
 
         public Builder()
         {
