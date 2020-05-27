@@ -16,7 +16,7 @@ namespace Tests
             pdfBuilder_ = new Builder();
         }
 
-        [TestCase(Constants.AlreadyExistsOutput, Constants.AlreadyExistsInput
+        [TestCase(Helpers.AlreadyExistsOutput, Helpers.AlreadyExistsInput
             , TestName = "Do not overwrite an existing output file")]
         public async Task DoNotOverwriteExistingPdf(string outFile, string inFile)
         {
@@ -30,7 +30,7 @@ namespace Tests
             {
                 Assert.Catch<PdfDocumentException>(() =>
                 {
-                    doc.LoadFromFile(Constants.Sample1Txt);
+                    doc.LoadFromFile(Helpers.Sample1Txt);
                 }, "Spire failed to throw exception on loading something that is not a PDF document");
             }
         }
@@ -40,13 +40,13 @@ namespace Tests
         {
             using (var doc = new PdfDocument())
             {
-                doc.LoadFromFile(Constants.ExistingPdf);
+                doc.LoadFromFile(Helpers.ExistingPdf);
                 Assert.AreEqual(3, doc.Pages.Count
                     , "Spire failed to parse a valid PDF");
             }
         }
 
-        [TestCase(@"..\..\..\..\Tests\outputs\autoCreateDirectory\sample1.pdf", Constants.Sample1Txt
+        [TestCase(@"..\..\..\..\Tests\outputs\autoCreateDirectory\sample1.pdf", Helpers.Sample1Txt
             , TestName = "Create output directory")]
         public async Task AutoCreateOutputDirectory(string outFile, string inFile)
         {
@@ -63,14 +63,14 @@ namespace Tests
             Assert.AreEqual(true, File.Exists(outFile), $"failed to create output file {outFile}");
         }
 
-        [TestCase(@"..\..\..\..\Tests\outputs\???invalid???\sample1.pdf", Constants.Sample1Txt
+        [TestCase(@"..\..\..\..\Tests\outputs\???invalid???\sample1.pdf", Helpers.Sample1Txt
             , TestName = "Invalid directory string")]
         public async Task InvalidOutputDirectory1(string outFile, string inFile)
         {
             Assert.AreEqual(PdfErrors.InvalidOutputPath, await pdfBuilder_.Create(outFile, inFile));
         }
 
-        [TestCase(@"\\DOESNOTEXIST\sample1.pdf", Constants.Sample1Txt
+        [TestCase(@"\\DOESNOTEXIST\sample1.pdf", Helpers.Sample1Txt
             , TestName = "Cannot create directory")]
         public async Task InvalidOutputDirectory2(string outFile, string inFile)
         {
@@ -78,9 +78,9 @@ namespace Tests
             Assert.AreEqual(PdfErrors.InvalidOutputPath, await pdfBuilder_.Create(outFile, inFile));
         }
 
-        [TestCase(Constants.Sample1Pdf, Constants.Sample1Txt, 1, TestName = "Sample1 is a PDF with one page")]
-        [TestCase(Constants.Sample8Pdf, Constants.Sample8Txt, 2, TestName = "Sample8 is a PDF with two pages")]
-        [TestCase(Constants.SampleThreePagesPdf, Constants.ThreePagesTxt, 3, TestName = "SampleThreePagesPdf is a PDF with three pages")]
+        [TestCase(Helpers.Sample1Pdf, Helpers.Sample1Txt, 1, TestName = "Sample1 is a PDF with one page")]
+        [TestCase(Helpers.Sample8Pdf, Helpers.Sample8Txt, 2, TestName = "Sample8 is a PDF with two pages")]
+        [TestCase(Helpers.SampleThreePagesPdf, Helpers.ThreePagesTxt, 3, TestName = "SampleThreePagesPdf is a PDF with three pages")]
         public async Task CheckPageCounts(string outFile, string inFile, int pageCount)
         {
             if (File.Exists(outFile))
