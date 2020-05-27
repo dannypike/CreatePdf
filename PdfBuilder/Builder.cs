@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace PdfBuilder
 {
@@ -32,7 +33,7 @@ namespace PdfBuilder
         /// <param name="outputFile"></param>
         /// <param name="inputFile"></param>
         /// <returns>An error result, <see cref="PdfErrors"> for details</see></returns>
-        public PdfErrors Create(string outputFile, string inputFile)
+        public async Task<PdfErrors> Create(string outputFile, string inputFile)
         {
             PdfErrors errCode = PdfErrors.Unexpected;
             try
@@ -120,7 +121,7 @@ namespace PdfBuilder
                 // Render the HTML as a PDF file
                 var rdr = new IronPdf.HtmlToPdf();
                 rdr.PrintOptions.PaperSize = IronPdf.PdfPrintOptions.PdfPaperSize.A4;
-                var pdf = rdr.RenderHtmlAsPdf(renderedHtml);
+                var pdf = await rdr.RenderHtmlAsPdfAsync(renderedHtml);
                 return pdf.TrySaveAs(outputFile) ? PdfErrors.None : PdfErrors.IronFailed;
             }
             catch (Exception ex)
