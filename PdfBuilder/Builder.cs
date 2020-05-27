@@ -65,14 +65,14 @@ namespace PdfBuilder
 
                 // Build the Html from the commands and text in the input file
                 var html = DI.GetRequiredService<IHtmlBodyFactory>().Create(DI);
-                if ((errCode = Build(Path.GetFullPath(inputFile), html, lines)) != PdfErrors.None)
+                if ((errCode = Build(Path.GetFullPath(inputFile), html, lines)) != PdfErrors.Success)
                 {
                     // Assume that the Build() method has already output a suitable message
                     return errCode;
                 }
 
                 // Generate the HTML that has been built from the command-file
-                if ((errCode = html.Render()) != PdfErrors.None)
+                if ((errCode = html.Render()) != PdfErrors.Success)
                 {
                     // Assume that the Render() method has already output a suitable message
                     return errCode;
@@ -106,7 +106,7 @@ namespace PdfBuilder
                     return PdfErrors.InvalidOutputPath;
                 }
 
-                return pdf.TrySaveAs(outputFile) ? PdfErrors.None : PdfErrors.IronFailed;
+                return pdf.TrySaveAs(outputFile) ? PdfErrors.Success : PdfErrors.IronFailed;
             }
             catch (Exception ex)
             {
@@ -124,7 +124,7 @@ namespace PdfBuilder
         /// <returns></returns>
         private PdfErrors Build(string context, IHtmlBody html, IEnumerable<string> lines)
         {
-            var errCode = PdfErrors.None;
+            var errCode = PdfErrors.Success;
 
             var lineIndex = 0;
             foreach (var line in lines)
@@ -139,7 +139,7 @@ namespace PdfBuilder
                     var words = line.Split(delims_);
                     if (commands_.TryGetValue(words[0], out CommandHandler handler))
                     {
-                        if ((errCode = handler(html, words.Skip(1))) != PdfErrors.None)
+                        if ((errCode = handler(html, words.Skip(1))) != PdfErrors.Success)
                         {
                             // Assume that the handler has already output a suitable message
                             return errCode;
@@ -154,8 +154,8 @@ namespace PdfBuilder
                 }
                 else
                 {
-                    if ((errCode = html.AddText(line)) != PdfErrors.None
-                        || (errCode = html.AddText(" ")) != PdfErrors.None
+                    if ((errCode = html.AddText(line)) != PdfErrors.Success
+                        || (errCode = html.AddText(" ")) != PdfErrors.Success
                         )
                     {
                         // Assume that the AddText() method has already output a suitable message

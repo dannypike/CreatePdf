@@ -18,7 +18,7 @@ namespace PdfBuilder.HtmlBuilder
         public PdfErrors AddText(string text)
         {
             sb_.Append(HttpUtility.HtmlEncode(text));
-            return PdfErrors.None;
+            return PdfErrors.Success;
         }
 
         public PdfErrors BoldText()
@@ -31,7 +31,7 @@ namespace PdfBuilder.HtmlBuilder
                 sb_.Append("<strong>");
                 bold_ = true;
             }
-            return PdfErrors.None;
+            return PdfErrors.Success;
         }
 
         public PdfErrors CancelJustify()
@@ -41,7 +41,7 @@ namespace PdfBuilder.HtmlBuilder
                 sb_.Append("</div>");
                 justifying_ = false;
             }
-            return PdfErrors.None;
+            return PdfErrors.Success;
         }
 
         public PdfErrors Indent(int increment)
@@ -59,7 +59,7 @@ namespace PdfBuilder.HtmlBuilder
                 sb_.Append($"<div style=\"padding-left:{25 * indentation_}px;\">");
             }
 
-            return PdfErrors.None;
+            return PdfErrors.Success;
         }
 
         public PdfErrors ItalicText()
@@ -72,13 +72,13 @@ namespace PdfBuilder.HtmlBuilder
                 sb_.Append("<em>");
                 italic_ = true;
             }
-            return PdfErrors.None;
+            return PdfErrors.Success;
         }
 
         public PdfErrors NewParagraph()
         {
             sb_.Append("</p><p>");
-            return PdfErrors.None;
+            return PdfErrors.Success;
         }
 
         public PdfErrors NormalText()
@@ -97,7 +97,7 @@ namespace PdfBuilder.HtmlBuilder
                 sb_.Append("</strong>");
                 bold_ = false;
             }
-            return PdfErrors.None;
+            return PdfErrors.Success;
         }
 
         public PdfErrors Render()
@@ -112,7 +112,7 @@ namespace PdfBuilder.HtmlBuilder
 
             // and get ready for a new one
             sb_ = new StringBuilder(1024);
-            return PdfErrors.None;
+            return PdfErrors.Success;
         }
 
         public PdfErrors RightJustify()
@@ -123,7 +123,7 @@ namespace PdfBuilder.HtmlBuilder
                 sb_.Append("<div style=\"text-align:justify;\">");
                 justifying_ = true;
             }
-            return PdfErrors.None;
+            return PdfErrors.Success;
         }
 
         public string RenderedHtml { get; private set; }
@@ -135,7 +135,7 @@ namespace PdfBuilder.HtmlBuilder
                 sb_.Append("</h1>");
                 heading_ = false;
             }
-            return PdfErrors.None;
+            return PdfErrors.Success;
         }
 
         public PdfErrors StartHeading()
@@ -145,7 +145,7 @@ namespace PdfBuilder.HtmlBuilder
                 sb_.Append("<h1>");
                 heading_ = true;
             }
-            return PdfErrors.None;
+            return PdfErrors.Success;
         }
 
         private bool bold_;

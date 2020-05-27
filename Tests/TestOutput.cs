@@ -59,7 +59,7 @@ namespace Tests
             Assert.AreEqual(false, Directory.Exists(directory));
 
             // Run the test
-            Assert.AreEqual(PdfErrors.None, await pdfBuilder_.Create(outFile, inFile));
+            Assert.AreEqual(PdfErrors.Success, await pdfBuilder_.Create(outFile, inFile));
             Assert.AreEqual(true, File.Exists(outFile), $"failed to create output file {outFile}");
         }
 
@@ -88,7 +88,7 @@ namespace Tests
                 Assert.DoesNotThrow(() => File.Delete(outFile)
                     , $"failed to delete output file {outFile}, is it in use?");
             }
-            Assert.AreEqual(PdfErrors.None, await pdfBuilder_.Create(outFile, inFile));
+            Assert.AreEqual(PdfErrors.Success, await pdfBuilder_.Create(outFile, inFile));
             using (var doc = new PdfDocument())
             {
                 await Task.Run(() =>

@@ -2,8 +2,8 @@
 {
     public enum PdfErrors
     {
-        None = 0,   // Although zero will be the default for enums, I like to emphasize this here so that 
-                    // the "None" value can be used as the return value from Main() on success.
+        Success = 0,    // Although zero will be the default for enums, I like to emphasize this here so that 
+                        // the "Success" value can also be used as the ERRORLEVEL returned by Main()
         Exception,                  // A C# exception was thrown and not caught
         Unexpected,                 // An unexpected error occurred
         InputFileNotFound,

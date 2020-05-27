@@ -27,7 +27,7 @@ namespace CreatePdf
             var builder = new PdfBuilder.Builder();
 
             var errCode = await builder.Create(outputFile, inputFile);
-            if (errCode != PdfErrors.None)
+            if (errCode != PdfErrors.Success)
             {
                 Console.WriteLine($"failed to create PDF file, error code = {errCode}");
                 return 1;
