@@ -89,6 +89,23 @@ namespace PdfBuilder
                 var rdr = new IronPdf.HtmlToPdf();
                 rdr.PrintOptions.PaperSize = IronPdf.PdfPrintOptions.PdfPaperSize.A4;
                 var pdf = await rdr.RenderHtmlAsPdfAsync(renderedHtml);
+
+                // Create the output folder, if it does not exist
+                string directory = string.Empty;
+                try
+                {
+                    directory = Path.GetDirectoryName(outputFile); // may be null if the outputFile is badly formed
+                    if (!Directory.Exists(directory))
+                    {
+                        Directory.CreateDirectory(directory);   // will throw IOException, if the outputFile folder is not valid
+                    }
+                }
+                catch (Exception ex)
+                {
+                    log_?.LogError($"invalid output folder '{directory}': {ex.Message}");
+                    return PdfErrors.InvalidOutputPath;
+                }
+
                 return pdf.TrySaveAs(outputFile) ? PdfErrors.None : PdfErrors.IronFailed;
             }
             catch (Exception ex)
