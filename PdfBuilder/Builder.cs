@@ -110,6 +110,12 @@ namespace PdfBuilder
             }
             catch (Exception ex)
             {
+                // Support MockSequence in the test suite by rethrowing Moq exceptions
+                if (ex?.GetType().Assembly.GetName().Name == "Moq")
+                {
+                    throw ex;
+                }
+
                 log_?.LogError($"caught exception: {ex.Message}");
                 return PdfErrors.Exception;
             }

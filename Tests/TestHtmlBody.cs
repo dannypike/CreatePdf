@@ -1,9 +1,11 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Moq.Language.Flow;
 using NUnit.Framework;
 using PdfBuilder;
 using PdfBuilder.Abstractions;
 using System;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace Tests
@@ -17,9 +19,9 @@ namespace Tests
         /// </summary>
         class Factory : IHtmlBodyFactory
         {
-            public Factory(MockSetup mockSetup)
+            public Factory(MockSetup mockSetup, MockBehavior mockBehaviour)
             {
-                mock_ = new Mock<IHtmlBody>();
+                mock_ = new Mock<IHtmlBody>(mockBehaviour);
                 mockSetup(mock_);
             }
             public IHtmlBody Create(IServiceProvider DI) => mock_.Object;
@@ -34,12 +36,12 @@ namespace Tests
         /// <param name="setup">A setup function that is invoked when the IHtmlBodyFactory
         /// constructs the mock IHtmlBody</param>
         /// <returns>Returns the PdfBuilder.Builder to use in the test</returns>
-        public static Builder MockBuilder(MockSetup setup)
+        public static Builder MockBuilder(MockSetup setup, MockBehavior mockBehaviour)
         {
             // Because we have a new IServiceProvider for each test, we can capture the Factory instance
             // and setup the Mock<IHtmlBody> that the test will use.
             var services = new ServiceCollection();
-            services.AddTransient<IHtmlBodyFactory>(ss => new Factory(setup));
+            services.AddTransient<IHtmlBodyFactory>(ss => new Factory(setup, mockBehaviour));
 
             // Construct and return a Builder that will use this injector (as an [out] parameter)
             return new Builder { DI = services.BuildServiceProvider() };
@@ -70,7 +72,7 @@ namespace Tests
                 mocker.InSequence(seq)
                     .Setup(bb => bb.RenderedHtml)
                     .Returns("<body>Hello, world</body>");
-            });
+            }, MockBehavior.Strict);
 
             Assert.AreEqual(PdfErrors.Success, await pdfBuilder.Create(outFile, inFile));
         }
@@ -107,7 +109,7 @@ world
                 mocker.InSequence(seq)
                     .Setup(bb => bb.RenderedHtml)
                     .Returns("<body>Hello, world</body>");
-            });
+            }, MockBehavior.Strict);
 
             Assert.AreEqual(PdfErrors.Success, await pdfBuilder.Create(outFile, inFile));
         }
@@ -123,45 +125,37 @@ Hello!
 Hi, world
 ");
 
-            int sequence = 0;
             var pdfBuilder = MockBuilder(mocker =>
             {
-                mocker
+                var seq = new MockSequence();
+
+                mocker.InSequence(seq)
                     .Setup(bb => bb.StartHeading())
-                    .Callback(() => { Assert.AreEqual(1, ++sequence); })
                     .Returns(PdfErrors.Success);
 
-                mocker
+                mocker.InSequence(seq)
                     .Setup(bb => bb.AddText("Hello!"))
-                    .Callback(() => { Assert.AreEqual(2, ++sequence); })
                     .Returns(PdfErrors.Success);
 
-                mocker
+                mocker.InSequence(seq)
                     .Setup(bb => bb.StartBody())
-                    .Callback(() => { Assert.AreEqual(3, ++sequence); })
                     .Returns(PdfErrors.Success);
 
-                mocker
+                mocker.InSequence(seq)
                     .Setup(bb => bb.AddText("Hi, world"))
-                    .Callback(() => { Assert.AreEqual(4, ++sequence); })
                     .Returns(PdfErrors.Success);
 
-                mocker
+                mocker.InSequence(seq)
                     .Setup(bb => bb.Render())
-                    .Callback(() => { Assert.AreEqual(5, ++sequence); })
                     .Returns(PdfErrors.Success)
                     ;
 
-                mocker
+                mocker.InSequence(seq)
                     .Setup(bb => bb.RenderedHtml)
-                    .Callback(() => { Assert.AreEqual(6, ++sequence); })
                     .Returns("<body>Hello, world</body>");
-            });
+            }, MockBehavior.Strict);
 
-            var result = await pdfBuilder.Create(outFile, inFile);
-
-            Assert.AreEqual(PdfErrors.Success, result);
-            Assert.AreEqual(6, sequence, "Not all methods were invoked");
+            Assert.AreEqual(PdfErrors.Success, await pdfBuilder.Create(outFile, inFile));
         }
     }
 }
