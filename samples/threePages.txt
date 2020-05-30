@@ -1,5 +1,12 @@
 .large
-My PDF Document
+My 
+.bold
+PDF
+.italics
+Document
+.paragraph
+.indent 2
+with multiple .large lines
 .normal
 .paragraph
 This is my
@@ -23,7 +30,8 @@ Well that was
 .bold
 exciting
 .regular
-, good luck!.large
+, good luck!
+.large
 My PDF Document
 .normal
 .paragraph

@@ -17,7 +17,16 @@ namespace PdfBuilder.HtmlBuilder
 
         public PdfErrors AddText(string text)
         {
-            sb_.Append(HttpUtility.HtmlEncode(text));
+            if (!string.IsNullOrEmpty(text))
+            {
+                // add a space delimiter if required and the next character is not punctuation
+                if (addSpace_ && !char.IsPunctuation(text[0]))
+                {
+                    sb_.Append(" ");
+                }
+                sb_.Append(HttpUtility.HtmlEncode(text));
+                addSpace_ = !text.EndsWith(" ");
+            }
             return PdfErrors.Success;
         }
 
@@ -40,6 +49,7 @@ namespace PdfBuilder.HtmlBuilder
             {
                 sb_.Append("</div>");
                 justifying_ = false;
+                addSpace_ = false;
             }
             return PdfErrors.Success;
         }
@@ -50,6 +60,7 @@ namespace PdfBuilder.HtmlBuilder
             {
                 // Cancel the previous padding
                 sb_.Append("</div>");
+                addSpace_ = false;
             }
 
             // And apply the new one, if there is one
@@ -57,6 +68,7 @@ namespace PdfBuilder.HtmlBuilder
             if (indentation_ != 0)
             {
                 sb_.Append($"<div style=\"padding-left:{25 * indentation_}px;\">");
+                addSpace_ = false;
             }
 
             return PdfErrors.Success;
@@ -78,6 +90,7 @@ namespace PdfBuilder.HtmlBuilder
         public PdfErrors NewParagraph()
         {
             sb_.Append("</p><p>");
+            addSpace_ = false;
             return PdfErrors.Success;
         }
 
@@ -85,14 +98,10 @@ namespace PdfBuilder.HtmlBuilder
         {
             if (italic_)
             {
-                if (bold_)
-                {
-                    return PdfErrors.BoldAndItalic;
-                }
                 sb_.Append("</em>");
                 italic_ = false;
             }
-            else if (bold_)
+            if (bold_)
             {
                 sb_.Append("</strong>");
                 bold_ = false;
@@ -107,8 +116,9 @@ namespace PdfBuilder.HtmlBuilder
             CancelJustify();
             Indent(-indentation_);  // This will close any div that we created for indentation
 
-            sb_.Append("</p></div?</body>");
+            sb_.Append("</p></div></body>");
             RenderedHtml = sb_.ToString();
+            addSpace_ = false;
 
             // and get ready for a new one
             sb_ = new StringBuilder(1024);
@@ -122,6 +132,7 @@ namespace PdfBuilder.HtmlBuilder
             {
                 sb_.Append("<div style=\"text-align:justify;\">");
                 justifying_ = true;
+                addSpace_ = false;
             }
             return PdfErrors.Success;
         }
@@ -132,8 +143,13 @@ namespace PdfBuilder.HtmlBuilder
         {
             if (heading_)
             {
+                // Cancel any emphasis and indent when swapping between .large and .regular
+                NormalText();
+                Indent(-indentation_);
+
                 sb_.Append("</h1>");
                 heading_ = false;
+                addSpace_ = false;
             }
             return PdfErrors.Success;
         }
@@ -142,8 +158,14 @@ namespace PdfBuilder.HtmlBuilder
         {
             if (!heading_)
             {
+                // Cancel any emphasis and indentation when swapping between .large and .regular
+                NormalText();
+                Indent(-indentation_);
+
+                // and start a heading
                 sb_.Append("<h1>");
                 heading_ = true;
+                addSpace_ = false;
             }
             return PdfErrors.Success;
         }
@@ -152,6 +174,7 @@ namespace PdfBuilder.HtmlBuilder
         private bool italic_;
         private bool justifying_;
         private bool heading_;
+        private bool addSpace_;
         private int indentation_;
         private StringBuilder sb_ = new StringBuilder(1024);
     }
