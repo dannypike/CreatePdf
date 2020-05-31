@@ -115,7 +115,7 @@ world
             var cts = new CancellationTokenSource();
             var di = new ServiceCollection()
                 .AddSingleton<IPdfBuilder, Builder>()
-                .AddSingleton<IHtmlBodyFactory>(di => new Factory(mockSetup, MockBehavior.Loose))
+                .AddSingleton<IHtmlBodyFactory>(di => new Factory(mockSetup, MockBehavior.Strict))
                 .AddTransient<IPdfBuilderResult, PdfBuilderResult>()
                 .AddTransient<IPdfBuilderResults, PdfBuilderResults>()
                 .AddSingleton<IPdfBuilderOptions>(_ => new PdfBuilderOptions(inFile, outFile)
