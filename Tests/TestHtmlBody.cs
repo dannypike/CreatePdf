@@ -1,12 +1,9 @@
-﻿using Castle.DynamicProxy;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using NUnit.Framework;
 using PdfBuilder;
 using PdfBuilder.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -31,13 +28,29 @@ namespace Tests
             public Mock<IHtmlBody> MockedBody { get; private set; }
         }
 
-        [TestCase(Helpers.SingleTextPdf, Helpers.SingleTextTxt, TestName = "Single line of text only")]
-        public async Task SingleLineTextOnly(string outFile, string inFile)
+        [TestCase(TestName = "Single line of text only")]
+        public async Task SingleLineTextOnly()
         {
-            Helpers.ArrangeFiles(outFile, inFile, true);
-            Helpers.BuildFile(inFile, "Hello, world");
-
             // arrange
+
+            // Ensure that the output file does not exist before
+            // we try to create it
+            var outFile = FileNames.TestOutput("singleLine");
+            if (File.Exists(outFile))
+            {
+                File.Delete(outFile);
+            }
+            Assert.IsFalse(File.Exists(outFile));
+
+            // Build the input file
+            var inFile = FileNames.TestInput("singleLine");
+            const string testString = "Hello, world";
+            File.WriteAllText(inFile, testString);
+            Assert.AreEqual(true, File.Exists(inFile));
+            Assert.AreEqual(testString, File.ReadAllText(inFile));
+
+            // Mock the HtmlBody to verify that the calls happen in the
+            // expected order
             MockSetup mockSetup = (Mock<IHtmlBody> body) =>
             {
                 var seq = new MockSequence();
@@ -56,7 +69,7 @@ namespace Tests
                 // ... and then it will retrieve the rendered HTML
                 body.InSequence(seq)
                     .Setup(bb => bb.RenderedHtml)
-                    .Returns("<body><p>Hello, world</p></body>");
+                    .Returns($"<body><p>{testString}</p></body>");
             };
 
             var cts = new CancellationTokenSource();
@@ -65,8 +78,11 @@ namespace Tests
                 .AddSingleton<IHtmlBodyFactory>(di => new Factory(mockSetup, MockBehavior.Strict))
                 .AddTransient<IPdfBuilderResult, PdfBuilderResult>()
                 .AddTransient<IPdfBuilderResults, PdfBuilderResults>()
-                .AddSingleton<IPdfBuilderOptions>(_ => new PdfBuilderOptions(inFile, outFile)
+                .AddSingleton<IPdfBuilderOptions>(_ => new PdfBuilderOptions
                 {
+                    Input = inFile,
+                    Output = outFile,
+                    Overwrite = false,
                     Cts = cts
                 })
                 .AddLogging()
@@ -79,18 +95,33 @@ namespace Tests
 
             // analyse
             Assert.AreEqual(PdfErrors.Success, pdfBuilder.FatalErrorCode);
+
+            // The output may be formatted differently from a standard call (font-sizing etc),
+            // but it should still be a valid PDF
+            Assert.IsTrue(Helpers.IsValidPdfFile(outFile));
         }
 
-        [TestCase(Helpers.MultipleTextPdf, Helpers.MultipleTextTxt, TestName = "Multiple lines of text")]
-        public async Task MultipleLinesTextOnly(string outFile, string inFile)
+        [TestCase(TestName = "Multiple lines of text")]
+        public async Task MultipleLinesTextOnly()
         {
-            Helpers.ArrangeFiles(outFile, inFile, true);
-            Helpers.BuildFile(inFile, @"
-Hello,
-world
-");
-
             // arrange
+
+            // Ensure that the output file does not exist before
+            // we try to create it
+            var outFile = FileNames.TestOutput("multipleLines");
+            if (File.Exists(outFile))
+            {
+                File.Delete(outFile);
+            }
+            Assert.IsFalse(File.Exists(outFile));
+
+            // Build the input file
+            var inFile = FileNames.TestInput("multipleLines");
+            const string testString = "Hello,\r\nworld\r\n";
+            File.WriteAllText(inFile, testString);
+            Assert.AreEqual(true, File.Exists(inFile));
+            Assert.AreEqual(testString, File.ReadAllText(inFile));
+
             MockSetup mockSetup = (Mock<IHtmlBody> body) =>
             {
                 var seq = new MockSequence();
@@ -109,7 +140,7 @@ world
 
                 body.InSequence(seq)
                     .Setup(bb => bb.RenderedHtml)
-                    .Returns("<body>Hello, world</body>");
+                    .Returns("<body><p>Hello, world</p></body>");
             };
 
             var cts = new CancellationTokenSource();
@@ -118,8 +149,11 @@ world
                 .AddSingleton<IHtmlBodyFactory>(di => new Factory(mockSetup, MockBehavior.Strict))
                 .AddTransient<IPdfBuilderResult, PdfBuilderResult>()
                 .AddTransient<IPdfBuilderResults, PdfBuilderResults>()
-                .AddSingleton<IPdfBuilderOptions>(_ => new PdfBuilderOptions(inFile, outFile)
+                .AddSingleton<IPdfBuilderOptions>(_ => new PdfBuilderOptions
                 {
+                    Input = inFile,
+                    Output = outFile,
+                    Overwrite = false,
                     Cts = cts
                 })
                 .AddLogging()
@@ -132,20 +166,30 @@ world
 
             // analyse
             Assert.AreEqual(PdfErrors.Success, pdfBuilder.FatalErrorCode);
+            Assert.IsTrue(Helpers.IsValidPdfFile(outFile));
         }
 
-        [TestCase(Helpers.LargeAndNormalPdf, Helpers.LargeAndNormalTxt, TestName = "Large and normal commands")]
-        public async Task LargeAndSmallText(string outFile, string inFile)
+        [TestCase(TestName = "Large and normal commands")]
+        public async Task LargeAndSmallText()
         {
-            Helpers.ArrangeFiles(outFile, inFile, true);
-            Helpers.BuildFile(inFile, @"
-.large
-Hello!
-.normal
-Hi, world
-");
-
             // arrange
+
+            // Ensure that the output file does not exist before
+            // we try to create it
+            var outFile = FileNames.TestOutput("largeAndNormal");
+            if (File.Exists(outFile))
+            {
+                File.Delete(outFile);
+            }
+            Assert.IsFalse(File.Exists(outFile));
+
+            // Build the input file
+            var inFile = FileNames.TestInput("largeAndNormal");
+            const string testString = ".large\r\nHello!\r\n.normal\r\nHi, world\r\n";
+            File.WriteAllText(inFile, testString);
+            Assert.AreEqual(true, File.Exists(inFile));
+            Assert.AreEqual(testString, File.ReadAllText(inFile));
+
             MockSetup mockSetup = (Mock<IHtmlBody> body) =>
             {
                 var seq = new MockSequence();
@@ -182,8 +226,11 @@ Hi, world
                 .AddSingleton<IHtmlBodyFactory>(di => new Factory(mockSetup, MockBehavior.Strict))
                 .AddTransient<IPdfBuilderResult, PdfBuilderResult>()
                 .AddTransient<IPdfBuilderResults, PdfBuilderResults>()
-                .AddSingleton<IPdfBuilderOptions>(_ => new PdfBuilderOptions(inFile, outFile)
+                .AddSingleton<IPdfBuilderOptions>(_ => new PdfBuilderOptions
                 {
+                    Input = inFile,
+                    Output = outFile,
+                    Overwrite = false,
                     Cts = cts
                 })
                 .AddLogging()

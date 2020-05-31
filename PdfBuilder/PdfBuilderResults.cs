@@ -7,7 +7,7 @@ namespace PdfBuilder
     /// <see cref="IPdfBuilderResults" />
     public class PdfBuilderResults : IPdfBuilderResults
     {
-        /// <see cref="=IPdfBuilderResults.Snapshot" />
+        /// <see cref="IPdfBuilderResults.Snapshot" />
         public IEnumerable<IPdfBuilderResult> Snapshot
         {
             get
@@ -24,7 +24,7 @@ namespace PdfBuilder
             }
         }
 
-        /// <see cref="=IPdfBuilderResults.FatalError" />
+        /// <see cref="IPdfBuilderResults.FatalError" />
         public IPdfBuilderResult FatalError
         {
             get
@@ -47,7 +47,7 @@ namespace PdfBuilder
             }
         }
 
-        /// <see cref="=IPdfBuilderResults.AddError" />
+        /// <see cref="IPdfBuilderResults.AddError" />
         public void AddError(bool fatal, PdfErrors errCode, string message = null)
         {
             var result = new PdfBuilderResult
@@ -66,7 +66,7 @@ namespace PdfBuilder
             }
         }
 
-        /// <see cref="=IPdfBuilderResults.Clear" />
+        /// <see cref="IPdfBuilderResults.Clear" />
         public void Clear()
         {
             lock (mx_)

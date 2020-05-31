@@ -25,7 +25,7 @@ namespace CreatePdf
         /// Accepts an input and output file name. The input file name contains the definition
         /// (command and raw text) for a PDF file and the PDF is written to the output filename
         /// </summary>
-        /// <param name="args">Command-line arguments: '--input=file_name_1 --output=file_name_2'</filename></param>
+        /// <param name="args">Command-line arguments: '--input=file_name_1 --output=file_name_2'</param>
         private static async Task<int> Main(string[] args)
         {
             Console.Title = "CreatePdf - a sample PDF generator";

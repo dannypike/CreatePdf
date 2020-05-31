@@ -9,7 +9,7 @@
     },
     "ThreePages": {
       "commandName": "Project",
-      "commandLineArgs": "--input=..\\..\\..\\samples\\threePages.txt --output=..\\..\\..\\outputs\\threePages.pdf"
+      "commandLineArgs": "--input=..\\..\\..\\samples\\threePages.txt --output=..\\..\\..\\outputs\\threePages.pdf --overwrite=true"
     }
   }
 }

@@ -1,1 +1,1 @@
-﻿This file is used to verify that CreatePdf() refuses to overwrite an existing PDF file in the output folder.
+﻿This file is used by the Test harness to verify whether CreatePdf() has overwritten an existing PDF file

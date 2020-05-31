@@ -83,7 +83,7 @@ namespace PdfBuilder
                 }
 
                 // We do not override output files (for safety)
-                if (File.Exists(options_.Output))
+                if (!options_.Overwrite && File.Exists(options_.Output))
                 {
                     log_?.LogError($"output file '{Path.GetFullPath(options_.Output)}' already exists");
                     return PdfErrors.OutputFileAlreadyExists;

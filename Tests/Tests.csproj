@@ -23,4 +23,8 @@
     <ProjectReference Include="..\PdfBuilder\PdfBuilder.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="outputs\" />
+  </ItemGroup>
+
 </Project>

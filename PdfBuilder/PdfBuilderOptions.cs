@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using PdfBuilder.Abstractions;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -8,24 +8,37 @@ namespace PdfBuilder
 {
     public class PdfBuilderOptions : IPdfBuilderOptions
     {
-        public enum PdfBuilderModes
-        {
-            Automatic,  // Choose mode according to whether Input is a file or a folder
-            SingleFile,
-            WatchFolder
-        }
+        /// <summary>
+        /// <see cref="IPdfBuilderOptions.Input"/>
+        /// </summary>
+        public string Input { get; set; }
 
-        public string Input { get; private set; }
-        public string Output { get; private set; }
-        public PdfBuilderModes Mode { get; set; } = PdfBuilderModes.Automatic;
+        /// <summary>
+        /// <see cref="IPdfBuilderOptions.Output"/>
+        /// </summary>
+        public string Output { get; set; }
+
+        /// <summary>
+        /// <see cref="IPdfBuilderOptions.Overwrite"/>
+        /// </summary>
+        public bool Overwrite { get; set; }
+
+        /// <summary>
+        /// <see cref="IPdfBuilderOptions.Cts"/>
+        /// </summary>
         public CancellationTokenSource Cts { get; set; }
 
-        public PdfBuilderOptions(string input, string output)
+        /// <summary>
+        /// Default constructor for setting the options explicitly
+        /// </summary>
+        public PdfBuilderOptions()
         {
-            Input = input;
-            Output = output;
         }
 
+        /// <summary>
+        /// For setting up from flags passed to the command-line
+        /// </summary>
+        /// <param name="args"></param>
         public PdfBuilderOptions(IEnumerable<string> args)
         {
             var cfg = new ConfigurationBuilder()
@@ -33,6 +46,7 @@ namespace PdfBuilder
                 .Build();
             Input = cfg["input"];
             Output = cfg["output"];
+            Overwrite = Convert.ToBoolean(cfg["overwrite"] ?? "False");
         }
     }
 }

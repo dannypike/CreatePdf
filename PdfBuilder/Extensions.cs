@@ -32,18 +32,22 @@ namespace PdfBuilder
         /// the input file exists and that the output file does not exist, so getting the arguments the wrong way around
         /// should be safe.
         /// </summary>
-        /// <param name="services">The IServiceCollection to be updated with the PdfBuilder factories</param>
-        /// <param name="inFile">The name of the command-line to parse for the definition of the PDF file</param>
-        /// <param name="outFile">The name of the output PDF file to create</param>
-        /// <param name="cts"><see cref="Extensions.PdfBuilderFromCommandLine(IServiceCollection, IEnumerable{string}, CancellationTokenSource)"/></param>
+        /// <param name="services">The IServiceCollection to be updated with the PdfBuilder factories.</param>
+        /// <param name="inFile">The name of the command-line to parse for the definition of the PDF file.</param>
+        /// <param name="outFile">The name of the output PDF file to create.</param>
+        /// <param name="overwrite">Set to true to overwrite the output PDF, if it already exists.</param>
+        /// <param name="cts"><see cref="PdfBuilderFromCommandLine(IServiceCollection, IEnumerable{string}, CancellationTokenSource)"/></param>
         /// <returns></returns>
         public static IServiceCollection PdfBuilderOneFile(this IServiceCollection services
-            , string inFile, string outFile, CancellationTokenSource cts = null)
+            , string inFile, string outFile, bool overwrite = false, CancellationTokenSource cts = null)
         {
             services
                 .PdfBuilderBasic()
-                .AddSingleton<IPdfBuilderOptions>(_ => new PdfBuilderOptions(inFile, outFile)
+                .AddSingleton<IPdfBuilderOptions>(_ => new PdfBuilderOptions
                 {
+                    Input = inFile,
+                    Output = outFile,
+                    Overwrite = overwrite,
                     Cts = cts,
                 })
                 ;
