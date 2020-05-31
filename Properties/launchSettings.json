@@ -1,6 +1,13 @@
 {
   "profiles": {
     "CreatePdf": {
+      "commandName": "Project"
+    },
+    "Watch": {
+      "commandName": "Project",
+      "commandLineArgs": "--watch=..\\..\\..\\samples\\*.txt"
+    },
+    "ThreePages": {
       "commandName": "Project",
       "commandLineArgs": "--input=..\\..\\..\\samples\\threePages.txt --output=..\\..\\..\\outputs\\threePages.pdf"
     }

@@ -1,16 +1,18 @@
-﻿using PdfBuilder.Abstractions;
-using System;
+﻿using Microsoft.Extensions.Logging;
+using PdfBuilder.Abstractions;
 using System.Text;
 using System.Web;
 
-namespace PdfBuilder.HtmlBuilder
+namespace PdfBuilder
 {
     public class HtmlBody : IHtmlBody
     {
-        public IServiceProvider DI { get; set; }
+        public ILogger<IHtmlBody> log_;
 
-        public HtmlBody()
+        public HtmlBody(ILogger<IHtmlBody> logger)
         {
+            log_ = logger;
+
             // Start with a basic HTML structure that works for IronPdf
             sb_.Append("<body><div style=\"font-size:16pt;\"><p>");
         }

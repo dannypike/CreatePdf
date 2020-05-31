@@ -1,26 +1,41 @@
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 using NUnit.Framework;
 using PdfBuilder;
 using PdfBuilder.Abstractions;
 using Spire.Pdf;
 using Spire.Pdf.Exceptions;
+using System.Configuration.Internal;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Tests
 {
     public class TestBuilder
     {
-        [SetUp]
-        public void Setup()
-        {
-            pdfBuilder_ = new Builder();
-        }
-
         [TestCase(Helpers.AlreadyExistsOutput, Helpers.AlreadyExistsInput
             , TestName = "Do not overwrite an existing output file")]
         public async Task DoNotOverwriteExistingPdf(string outFile, string inFile)
         {
-            Assert.AreEqual(PdfErrors.OutputFileAlreadyExists, await pdfBuilder_.Create(outFile, inFile));
+            // arrange
+            var di = new ServiceCollection()
+                .AddTransient<IPdfBuilder, Builder>()
+                .PdfBuilderOneFile(inFile, outFile)
+                .AddLogging(configure => configure.AddConsole(options => options.Format = ConsoleLoggerFormat.Systemd))
+                .BuildServiceProvider()
+                ;
+            var pdfBuilder = di.GetService<IPdfBuilder>();
+            Assert.IsNotNull(pdfBuilder, "failed to construct PdfBuilder");
+            var cts = new CancellationTokenSource();
+
+            // act
+            await pdfBuilder.StartAsync(cts.Token);
+
+            // analyse
+            Assert.AreEqual(PdfErrors.OutputFileAlreadyExists, pdfBuilder.FatalErrorCode);
         }
 
         [Test(Description = "Does Spire.PDF detect a bad PDF?"), Order(1)]
@@ -50,7 +65,18 @@ namespace Tests
             , TestName = "Create output directory")]
         public async Task AutoCreateOutputDirectory(string outFile, string inFile)
         {
-            // Delete the output directory, if it still exists from an earlier run
+            // arrange
+            var di = new ServiceCollection()
+                .AddTransient<IPdfBuilder, Builder>()
+                .PdfBuilderOneFile(inFile, outFile)
+                .AddLogging(configure => configure.AddConsole(options => options.Format = ConsoleLoggerFormat.Systemd))
+                .BuildServiceProvider()
+                ;
+            var pdfBuilder = di.GetService<IPdfBuilder>();
+            Assert.IsNotNull(pdfBuilder, "failed to construct PdfBuilder");
+            var cts = new CancellationTokenSource();
+
+            // ... remove the directory, if it still exists from an earlier test run
             var directory = Path.GetDirectoryName(outFile);
             if (Directory.Exists(directory))
             {
@@ -58,8 +84,11 @@ namespace Tests
             }
             Assert.AreEqual(false, Directory.Exists(directory));
 
-            // Run the test
-            Assert.AreEqual(PdfErrors.Success, await pdfBuilder_.Create(outFile, inFile));
+            // act
+            await pdfBuilder.StartAsync(cts.Token);
+
+            // analyse
+            Assert.AreEqual(PdfErrors.Success, pdfBuilder.FatalErrorCode);
             Assert.AreEqual(true, File.Exists(outFile), $"failed to create output file {outFile}");
         }
 
@@ -67,15 +96,45 @@ namespace Tests
             , TestName = "Invalid directory string")]
         public async Task InvalidOutputDirectory1(string outFile, string inFile)
         {
-            Assert.AreEqual(PdfErrors.InvalidOutputPath, await pdfBuilder_.Create(outFile, inFile));
+            // arrange
+            var di = new ServiceCollection()
+                .AddTransient<IPdfBuilder, Builder>()
+                .PdfBuilderOneFile(inFile, outFile)
+                .AddLogging(configure => configure.AddConsole(options => options.Format = ConsoleLoggerFormat.Systemd))
+                .BuildServiceProvider()
+                ;
+            var pdfBuilder = di.GetService<IPdfBuilder>();
+            Assert.IsNotNull(pdfBuilder, "failed to construct PdfBuilder");
+            var cts = new CancellationTokenSource();
+
+            // act
+            await pdfBuilder.StartAsync(cts.Token);
+
+            // analyse
+            Assert.AreEqual(PdfErrors.InvalidOutputPath, pdfBuilder.FatalErrorCode);
         }
 
         [TestCase(@"\\DOESNOTEXIST\sample1.pdf", Helpers.Sample1Txt
             , TestName = "Cannot create directory")]
         public async Task InvalidOutputDirectory2(string outFile, string inFile)
         {
+            // arrange
+            var di = new ServiceCollection()
+                .AddTransient<IPdfBuilder, Builder>()
+                .PdfBuilderOneFile(inFile, outFile)
+                .AddLogging(configure => configure.AddConsole(options => options.Format = ConsoleLoggerFormat.Systemd))
+                .BuildServiceProvider()
+                ;
+            var pdfBuilder = di.GetService<IPdfBuilder>();
+            Assert.IsNotNull(pdfBuilder, "failed to construct PdfBuilder");
+            var cts = new CancellationTokenSource();
+
+            // act
             // Note: this may take a few seconds because Windows will look for a server that 'DOESNOTEXIST' :)
-            Assert.AreEqual(PdfErrors.InvalidOutputPath, await pdfBuilder_.Create(outFile, inFile));
+            await pdfBuilder.StartAsync(cts.Token);
+
+            // analyse
+            Assert.AreEqual(PdfErrors.InvalidOutputPath, pdfBuilder.FatalErrorCode);
         }
 
         [TestCase(Helpers.Sample1Pdf, Helpers.Sample1Txt, 1, TestName = "Sample1 is a PDF with one page")]
@@ -83,12 +142,28 @@ namespace Tests
         [TestCase(Helpers.SampleThreePagesPdf, Helpers.ThreePagesTxt, 3, TestName = "SampleThreePagesPdf is a PDF with three pages")]
         public async Task CheckPageCounts(string outFile, string inFile, int pageCount)
         {
+            // arrange
+            var di = new ServiceCollection()
+                .AddTransient<IPdfBuilder, Builder>()
+                .PdfBuilderOneFile(inFile, outFile)
+                .AddLogging(configure => configure.AddConsole(options => options.Format = ConsoleLoggerFormat.Systemd))
+                .BuildServiceProvider()
+                ;
+            var pdfBuilder = di.GetService<IPdfBuilder>();
+            Assert.IsNotNull(pdfBuilder, "failed to construct PdfBuilder");
+            var cts = new CancellationTokenSource();
+
             if (File.Exists(outFile))
             {
                 Assert.DoesNotThrow(() => File.Delete(outFile)
                     , $"failed to delete output file {outFile}, is it in use?");
             }
-            Assert.AreEqual(PdfErrors.Success, await pdfBuilder_.Create(outFile, inFile));
+
+            // act
+            await pdfBuilder.StartAsync(cts.Token);
+
+            // analyse
+            Assert.AreEqual(PdfErrors.Success, pdfBuilder.FatalErrorCode);
             using (var doc = new PdfDocument())
             {
                 await Task.Run(() =>
@@ -98,7 +173,5 @@ namespace Tests
                 });
             }
         }
-
-        private Builder pdfBuilder_;
     }
 }

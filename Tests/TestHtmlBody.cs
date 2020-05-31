@@ -1,11 +1,13 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Castle.DynamicProxy;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using Moq.Language.Flow;
 using NUnit.Framework;
 using PdfBuilder;
 using PdfBuilder.Abstractions;
 using System;
-using System.Linq.Expressions;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Tests
@@ -17,34 +19,16 @@ namespace Tests
         /// <summary>
         /// An IHtmlBodyFactory implementation that uses a singleton IHtmlBody for us to setup with Moq
         /// </summary>
-        class Factory : IHtmlBodyFactory
+        private class Factory : IHtmlBodyFactory
         {
             public Factory(MockSetup mockSetup, MockBehavior mockBehaviour)
             {
-                mock_ = new Mock<IHtmlBody>(mockBehaviour);
-                mockSetup(mock_);
+                MockedBody = new Mock<IHtmlBody>(mockBehaviour);
+                mockSetup(MockedBody);
             }
-            public IHtmlBody Create(IServiceProvider DI) => mock_.Object;
 
-            private Mock<IHtmlBody> mock_ { get; set; }
-        }
-
-        /// <summary>
-        /// A helper for setting up a Mock&lt;IHtmlBody&gt; that will be returned by
-        /// the IServiceProvider logic inside PdfBuilder.Builder.
-        /// </summary>
-        /// <param name="setup">A setup function that is invoked when the IHtmlBodyFactory
-        /// constructs the mock IHtmlBody</param>
-        /// <returns>Returns the PdfBuilder.Builder to use in the test</returns>
-        public static Builder MockBuilder(MockSetup setup, MockBehavior mockBehaviour)
-        {
-            // Because we have a new IServiceProvider for each test, we can capture the Factory instance
-            // and setup the Mock<IHtmlBody> that the test will use.
-            var services = new ServiceCollection();
-            services.AddTransient<IHtmlBodyFactory>(ss => new Factory(setup, mockBehaviour));
-
-            // Construct and return a Builder that will use this injector (as an [out] parameter)
-            return new Builder { DI = services.BuildServiceProvider() };
+            public IHtmlBody CreateHtmlBody() => MockedBody.Object;
+            public Mock<IHtmlBody> MockedBody { get; private set; }
         }
 
         [TestCase(Helpers.SingleTextPdf, Helpers.SingleTextTxt, TestName = "Single line of text only")]
@@ -53,28 +37,48 @@ namespace Tests
             Helpers.ArrangeFiles(outFile, inFile, true);
             Helpers.BuildFile(inFile, "Hello, world");
 
-            var pdfBuilder = MockBuilder(mocker =>
+            // arrange
+            MockSetup mockSetup = (Mock<IHtmlBody> body) =>
             {
                 var seq = new MockSequence();
 
                 // Builder.Create() will call AddText() ...
-                mocker.InSequence(seq)
+                body.InSequence(seq)
                     .Setup(bb => bb.AddText("Hello, world"))
                     .Returns(PdfErrors.Success);
 
                 // .. and then it will call IHtmlBody.Render() ...
-                mocker.InSequence(seq)
+                body.InSequence(seq)
                     .Setup(bb => bb.Render())
                     .Returns(PdfErrors.Success)
                     ;
 
                 // ... and then it will retrieve the rendered HTML
-                mocker.InSequence(seq)
+                body.InSequence(seq)
                     .Setup(bb => bb.RenderedHtml)
-                    .Returns("<body>Hello, world</body>");
-            }, MockBehavior.Strict);
+                    .Returns("<body><p>Hello, world</p></body>");
+            };
 
-            Assert.AreEqual(PdfErrors.Success, await pdfBuilder.Create(outFile, inFile));
+            var cts = new CancellationTokenSource();
+            var di = new ServiceCollection()
+                .AddSingleton<IPdfBuilder, Builder>()
+                .AddSingleton<IHtmlBodyFactory>(di => new Factory(mockSetup, MockBehavior.Strict))
+                .AddTransient<IPdfBuilderResult, PdfBuilderResult>()
+                .AddTransient<IPdfBuilderResults, PdfBuilderResults>()
+                .AddSingleton<IPdfBuilderOptions>(_ => new PdfBuilderOptions(inFile, outFile)
+                {
+                    Cts = cts
+                })
+                .AddLogging()
+                .BuildServiceProvider()
+                 ;
+            var pdfBuilder = di.GetRequiredService<IPdfBuilder>();
+
+            // act
+            await pdfBuilder.StartAsync(cts.Token);
+
+            // analyse
+            Assert.AreEqual(PdfErrors.Success, pdfBuilder.FatalErrorCode);
         }
 
         [TestCase(Helpers.MultipleTextPdf, Helpers.MultipleTextTxt, TestName = "Multiple lines of text")]
@@ -85,33 +89,49 @@ namespace Tests
 Hello,
 world
 ");
-            var pdfBuilder = MockBuilder(mocker =>
+
+            // arrange
+            MockSetup mockSetup = (Mock<IHtmlBody> body) =>
             {
                 var seq = new MockSequence();
-
-                mocker.InSequence(seq)
+                body.InSequence(seq)
                     .Setup(bb => bb.AddText("Hello,"))
                     .Returns(PdfErrors.Success);
 
-                mocker.InSequence(seq)
-                    .Setup(bb => bb.AddText(" "))
-                    .Returns(PdfErrors.Success);
-
-                mocker.InSequence(seq)
+                body.InSequence(seq)
                     .Setup(bb => bb.AddText("world"))
                     .Returns(PdfErrors.Success);
 
-                mocker.InSequence(seq)
+                body.InSequence(seq)
                     .Setup(bb => bb.Render())
                     .Returns(PdfErrors.Success)
                     ;
 
-                mocker.InSequence(seq)
+                body.InSequence(seq)
                     .Setup(bb => bb.RenderedHtml)
                     .Returns("<body>Hello, world</body>");
-            }, MockBehavior.Strict);
+            };
 
-            Assert.AreEqual(PdfErrors.Success, await pdfBuilder.Create(outFile, inFile));
+            var cts = new CancellationTokenSource();
+            var di = new ServiceCollection()
+                .AddSingleton<IPdfBuilder, Builder>()
+                .AddSingleton<IHtmlBodyFactory>(di => new Factory(mockSetup, MockBehavior.Loose))
+                .AddTransient<IPdfBuilderResult, PdfBuilderResult>()
+                .AddTransient<IPdfBuilderResults, PdfBuilderResults>()
+                .AddSingleton<IPdfBuilderOptions>(_ => new PdfBuilderOptions(inFile, outFile)
+                {
+                    Cts = cts
+                })
+                .AddLogging()
+                .BuildServiceProvider()
+                 ;
+            var pdfBuilder = di.GetRequiredService<IPdfBuilder>();
+
+            // act
+            await pdfBuilder.StartAsync(cts.Token);
+
+            // analyse
+            Assert.AreEqual(PdfErrors.Success, pdfBuilder.FatalErrorCode);
         }
 
         [TestCase(Helpers.LargeAndNormalPdf, Helpers.LargeAndNormalTxt, TestName = "Large and normal commands")]
@@ -125,37 +145,57 @@ Hello!
 Hi, world
 ");
 
-            var pdfBuilder = MockBuilder(mocker =>
+            // arrange
+            MockSetup mockSetup = (Mock<IHtmlBody> body) =>
             {
                 var seq = new MockSequence();
 
-                mocker.InSequence(seq)
+                body.InSequence(seq)
                     .Setup(bb => bb.StartHeading())
                     .Returns(PdfErrors.Success);
 
-                mocker.InSequence(seq)
+                body.InSequence(seq)
                     .Setup(bb => bb.AddText("Hello!"))
                     .Returns(PdfErrors.Success);
 
-                mocker.InSequence(seq)
+                body.InSequence(seq)
                     .Setup(bb => bb.StartBody())
                     .Returns(PdfErrors.Success);
 
-                mocker.InSequence(seq)
+                body.InSequence(seq)
                     .Setup(bb => bb.AddText("Hi, world"))
                     .Returns(PdfErrors.Success);
 
-                mocker.InSequence(seq)
+                body.InSequence(seq)
                     .Setup(bb => bb.Render())
                     .Returns(PdfErrors.Success)
                     ;
 
-                mocker.InSequence(seq)
+                body.InSequence(seq)
                     .Setup(bb => bb.RenderedHtml)
                     .Returns("<body>Hello, world</body>");
-            }, MockBehavior.Strict);
+            };
 
-            Assert.AreEqual(PdfErrors.Success, await pdfBuilder.Create(outFile, inFile));
+            var cts = new CancellationTokenSource();
+            var di = new ServiceCollection()
+                .AddSingleton<IPdfBuilder, Builder>()
+                .AddSingleton<IHtmlBodyFactory>(di => new Factory(mockSetup, MockBehavior.Strict))
+                .AddTransient<IPdfBuilderResult, PdfBuilderResult>()
+                .AddTransient<IPdfBuilderResults, PdfBuilderResults>()
+                .AddSingleton<IPdfBuilderOptions>(_ => new PdfBuilderOptions(inFile, outFile)
+                {
+                    Cts = cts
+                })
+                .AddLogging()
+                .BuildServiceProvider()
+                 ;
+            var pdfBuilder = di.GetRequiredService<IPdfBuilder>();
+
+            // act
+            await pdfBuilder.StartAsync(cts.Token);
+
+            // analyse
+            Assert.AreEqual(PdfErrors.Success, pdfBuilder.FatalErrorCode);
         }
     }
 }
