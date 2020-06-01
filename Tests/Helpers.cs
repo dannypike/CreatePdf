@@ -1,10 +1,6 @@
-﻿using NUnit.Framework;
-using Spire.Pdf;
+﻿using Spire.Pdf;
 using Spire.Pdf.Exceptions;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 
 namespace Tests
 {

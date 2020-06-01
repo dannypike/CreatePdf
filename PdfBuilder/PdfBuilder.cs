@@ -2,6 +2,7 @@
 using PdfBuilder.Abstractions;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -140,6 +141,25 @@ namespace PdfBuilder
             {
                 log_?.LogWarning($"the command-file {Path.GetFullPath(options_.Input)}' produced no output");
                 return PdfErrors.EmptyOutput;
+            }
+
+            // Output the rendered HTML to the intermediate file, if one was set
+            var intermediate = options_?.HtmlIntermediate;
+            if (!string.IsNullOrEmpty(intermediate))
+            {
+                try
+                {
+                    if (File.Exists(intermediate))
+                    {
+                        File.Delete(intermediate);
+                    }
+                    File.WriteAllText(intermediate, renderedHtml);
+                }
+                catch (Exception ex)
+                {
+                    log_?.LogError($"failed to save intermediate Html to '{intermediate}': {ex.Message}");
+                    return PdfErrors.IntermediateHtml;
+                }
             }
 
             // Render the HTML as a PDF file
@@ -318,6 +338,12 @@ namespace PdfBuilder
                 return body.Indent(increment);
             }
             return PdfErrors.InvalidIndent;
+        }
+
+        public IPdfBuilder RegisterFatalErrorCodeHandler(Action<PdfErrors> handler)
+        {
+            Results?.RegisterFatalErrorCodeHandler(handler);
+            return this;
         }
 
         /// <summary>

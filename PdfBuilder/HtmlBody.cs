@@ -10,7 +10,6 @@ namespace PdfBuilder
     /// </summary>
     public class HtmlBody : IHtmlBody
     {
-        public ILogger<IHtmlBody> log_;
         /// <summary>
         /// An implementation of <see cref="IHtmlBody"/>.
         /// 
@@ -22,7 +21,7 @@ namespace PdfBuilder
             log_ = logger;
 
             // Start with a basic HTML structure that works for IronPdf
-            sb_.Append("<body><div style=\"font-size:16pt;\"><p>");
+            sb_.Append(HtmlStrings.BodyBegin);
         }
 
         /// <summary>
@@ -51,9 +50,13 @@ namespace PdfBuilder
             if (!bold_)
             {
                 // Cancel any other font setting (so we don't have to have a stack-based state machine)
-                NormalText();
+                var errCode = NormalText();
+                if (errCode != PdfErrors.Success)
+                {
+                    return errCode;
+                }
 
-                sb_.Append("<strong>");
+                sb_.Append(HtmlStrings.BoldBegin);
                 bold_ = true;
             }
             return PdfErrors.Success;
@@ -66,7 +69,7 @@ namespace PdfBuilder
         {
             if (justifying_)
             {
-                sb_.Append("</div>");
+                sb_.Append(HtmlStrings.JustifyEnd);
                 justifying_ = false;
                 addSpace_ = false;
             }
@@ -89,8 +92,8 @@ namespace PdfBuilder
             indentation_ += increment;
             if (indentation_ != 0)
             {
-                sb_.Append($"<div style=\"padding-left:{25 * indentation_}px;\">");
                 addSpace_ = false;
+                sb_.Append(HtmlStrings.Indentation(indentation_));
             }
 
             return PdfErrors.Success;
@@ -104,9 +107,13 @@ namespace PdfBuilder
             if (!italic_)
             {
                 // Cancel any other font setting (so we don't have to have a stack-based state machine)
-                NormalText();
+                var errCode = NormalText();
+                if (errCode != PdfErrors.Success)
+                {
+                    return errCode;
+                }
 
-                sb_.Append("<em>");
+                sb_.Append(HtmlStrings.ItalicBegin);
                 italic_ = true;
             }
             return PdfErrors.Success;
@@ -117,7 +124,7 @@ namespace PdfBuilder
         /// </summary>
         public PdfErrors NewParagraph()
         {
-            sb_.Append("</p><p>");
+            sb_.Append(HtmlStrings.NewParagraph);
             addSpace_ = false;
             return PdfErrors.Success;
         }
@@ -129,12 +136,13 @@ namespace PdfBuilder
         {
             if (italic_)
             {
-                sb_.Append("</em>");
+                sb_.Append(HtmlStrings.ItalicEnd);
                 italic_ = false;
             }
+            
             if (bold_)
             {
-                sb_.Append("</strong>");
+                sb_.Append(HtmlStrings.BoldEnd);
                 bold_ = false;
             }
             return PdfErrors.Success;
@@ -146,11 +154,25 @@ namespace PdfBuilder
         public PdfErrors Render()
         {
             // Terminate the HTML document
-            NormalText();
-            CancelJustify();
-            Indent(-indentation_);  // This will close any div that we created for indentation
+            var errCode = NormalText();
+            if (errCode != PdfErrors.Success)
+            {
+                return errCode;
+            }
 
-            sb_.Append("</p></div></body>");
+            errCode = CancelJustify();
+            if (errCode != PdfErrors.Success)
+            {
+                return errCode;
+            }
+            
+            errCode = Indent(-indentation_);  // This will close any div that we created for indentation
+            if (errCode != PdfErrors.Success)
+            {
+                return errCode;
+            }
+
+            sb_.Append(HtmlStrings.BodyEnd);
             RenderedHtml = sb_.ToString();
             addSpace_ = false;
 
@@ -167,7 +189,7 @@ namespace PdfBuilder
             // .fill is idempotent
             if (!justifying_)
             {
-                sb_.Append("<div style=\"text-align:justify;\">");
+                sb_.Append(HtmlStrings.JustifyBegin);
                 justifying_ = true;
                 addSpace_ = false;
             }
@@ -187,10 +209,19 @@ namespace PdfBuilder
             if (heading_)
             {
                 // Cancel any emphasis and indent when swapping between .large and .regular
-                NormalText();
-                Indent(-indentation_);
+                var errCode = NormalText();
+                if (errCode != PdfErrors.Success)
+                {
+                    return errCode;
+                }
 
-                sb_.Append("</h1>");
+                errCode = Indent(-indentation_);
+                if (errCode != PdfErrors.Success)
+                {
+                    return errCode;
+                }
+
+                sb_.Append(HtmlStrings.HeadingEnd);
                 heading_ = false;
                 addSpace_ = false;
             }
@@ -205,17 +236,27 @@ namespace PdfBuilder
             if (!heading_)
             {
                 // Cancel any emphasis and indentation when swapping between .large and .regular
-                NormalText();
-                Indent(-indentation_);
+                var errCode = NormalText();
+                if (errCode != PdfErrors.Success)
+                {
+                    return errCode;
+                }
+
+                errCode = Indent(-indentation_);
+                if (errCode != PdfErrors.Success)
+                {
+                    return errCode;
+                }
 
                 // and start a heading
-                sb_.Append("<h1>");
+                sb_.Append(HtmlStrings.HeadingBegin);
                 heading_ = true;
                 addSpace_ = false;
             }
             return PdfErrors.Success;
         }
 
+        private ILogger<IHtmlBody> log_;
         private bool bold_;
         private bool italic_;
         private bool justifying_;

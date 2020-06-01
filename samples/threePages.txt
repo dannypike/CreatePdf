@@ -1,8 +1,8 @@
 .large
 My 
-.bold
-PDF
 .italics
+PDF
+.regular
 Document
 .paragraph
 .indent 2
@@ -31,6 +31,7 @@ Well that was
 exciting
 .regular
 , good luck!
+.paragraph
 .large
 My PDF Document
 .normal
@@ -57,6 +58,7 @@ Well that was
 exciting
 .regular
 , good luck!
+.paragraph
 .large
 My PDF Document
 .normal
@@ -83,6 +85,7 @@ Well that was
 exciting
 .regular
 , good luck!
+.paragraph
 .large
 My PDF Document
 .normal
@@ -109,6 +112,7 @@ Well that was
 exciting
 .regular
 , good luck!
+.paragraph
 .large
 My PDF Document
 .normal
@@ -135,6 +139,7 @@ Well that was
 exciting
 .regular
 , good luck!
+.paragraph
 .large
 My PDF Document
 .normal
@@ -161,6 +166,7 @@ Well that was
 exciting
 .regular
 , good luck!
+.paragraph
 .large
 My PDF Document
 .normal
@@ -187,6 +193,7 @@ Well that was
 exciting
 .regular
 , good luck!
+.paragraph
 .large
 My PDF Document
 .normal

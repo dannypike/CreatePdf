@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace PdfBuilder.Abstractions
 {
@@ -30,5 +31,12 @@ namespace PdfBuilder.Abstractions
         /// Reset the error collection, clearing the FatalError latch
         /// </summary>
         void Clear();
+
+        /// <summary>
+        /// Register a function to receive the FatalErrorCode from this instance
+        /// </summary>
+        /// <param name="handler">The first fatal error code that was added to this instance
+        /// <returns>this</returns>
+        IPdfBuilderResults RegisterFatalErrorCodeHandler(Action<PdfErrors> handler);
     }
 }

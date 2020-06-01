@@ -1,4 +1,5 @@
 ﻿using PdfBuilder.Abstractions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -7,23 +8,6 @@ namespace PdfBuilder
     /// <see cref="IPdfBuilderResults" />
     public class PdfBuilderResults : IPdfBuilderResults
     {
-        /// <see cref="IPdfBuilderResults.Snapshot" />
-        public IEnumerable<IPdfBuilderResult> Snapshot
-        {
-            get
-            {
-                lock (mx_)
-                {
-                    return results_.Select(src => new PdfBuilderResult
-                    {
-                        ErrorCode = src.ErrorCode,
-                        FatalError = src.FatalError,
-                        Message = src.Message
-                    });
-                }
-            }
-        }
-
         /// <see cref="IPdfBuilderResults.FatalError" />
         public IPdfBuilderResult FatalError
         {
@@ -47,6 +31,23 @@ namespace PdfBuilder
             }
         }
 
+        /// <see cref="IPdfBuilderResults.Snapshot" />
+        public IEnumerable<IPdfBuilderResult> Snapshot
+        {
+            get
+            {
+                lock (mx_)
+                {
+                    return results_.Select(src => new PdfBuilderResult
+                    {
+                        ErrorCode = src.ErrorCode,
+                        FatalError = src.FatalError,
+                        Message = src.Message
+                    });
+                }
+            }
+        }
+
         /// <see cref="IPdfBuilderResults.AddError" />
         public void AddError(bool fatal, PdfErrors errCode, string message = null)
         {
@@ -59,9 +60,10 @@ namespace PdfBuilder
             lock (mx_)
             {
                 results_.Add(result);
-                if (fatal)
+                if (fatal && FatalError == null)
                 {
-                    FatalError = result;    // Will have no effect if the FatalError is already set
+                    FatalError = result;
+                    handler_?.Invoke(errCode);
                 }
             }
         }
@@ -76,8 +78,18 @@ namespace PdfBuilder
             }
         }
 
-        private object mx_ = new object();
+        /// <summary>
+        /// <see cref="IPdfBuilderResults.RegisterFatalErrorCodeHandler(Action{PdfErrors})"/>
+        /// </summary>
+        public IPdfBuilderResults RegisterFatalErrorCodeHandler(Action<PdfErrors> handler)
+        {
+            handler_ = handler;
+            return this;
+        }
+
         private IPdfBuilderResult fatal_;
+        private Action<PdfErrors> handler_;
+        private object mx_ = new object();
         private IList<IPdfBuilderResult> results_ = new List<IPdfBuilderResult>();
     }
 }

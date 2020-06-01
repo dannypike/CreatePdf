@@ -1,7 +1,9 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
 using PdfBuilder;
+using PdfBuilder.Abstractions;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,16 +12,7 @@ namespace CreatePdf
 {
     internal class Program
     {
-        private static int exitCode_ = 0;
-
-        public static void SetExitCode(int value)
-        {
-            if (exitCode_ == 0)
-            {
-                // Capture the first non-zero exit code (ignore cascading errors)
-                exitCode_ = value;
-            }
-        }
+        private static PdfErrors exitCode_ = 0;
 
         /// <summary>
         /// Accepts an input and output file name. The input file name contains the definition
@@ -34,16 +27,21 @@ namespace CreatePdf
             await new HostBuilder()
                 .ConfigureServices(services =>
                 {
-                    services.PdfBuilderFromCommandLine(args, cts);
+                    services
+                        .PdfBuilderBasic()
+                        .AddSingleton<IPdfBuilderOptions>(_ => new PdfBuilderOptions(args, cts))
+                        .AddSingleton<IHostedService>(_ => _
+                            .GetService<IPdfBuilder>()
+                            .RegisterFatalErrorCodeHandler(exitCode => exitCode_ = exitCode)
+                            )
+                        ;
                 })
                 .ConfigureLogging(builder => builder
-                    .AddConsole(options =>
-                        options.Format = ConsoleLoggerFormat.Systemd
-                        )
+                    .AddConsole(options => options.Format = ConsoleLoggerFormat.Systemd)
                     )
-                .RunConsoleAsync(cts.Token);
+                .RunConsoleAsync(configure => configure.SuppressStatusMessages = true, cts.Token);
 
-            return exitCode_;
+            return (int)exitCode_;
         }
     }
 }

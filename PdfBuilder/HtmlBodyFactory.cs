@@ -5,13 +5,13 @@ namespace PdfBuilder
 {
     public class HtmlBodyFactory : IHtmlBodyFactory
     {
-        private ILogger<IHtmlBody> logger_;
-
         public HtmlBodyFactory(ILogger<IHtmlBody> logger)
         {
             logger_ = logger;
         }
 
         public IHtmlBody CreateHtmlBody() => new HtmlBody(logger_);
+
+        private ILogger<IHtmlBody> logger_;
     }
 }

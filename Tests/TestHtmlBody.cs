@@ -69,7 +69,7 @@ namespace Tests
                 // ... and then it will retrieve the rendered HTML
                 body.InSequence(seq)
                     .Setup(bb => bb.RenderedHtml)
-                    .Returns($"<body><p>{testString}</p></body>");
+                    .Returns($"{HtmlStrings.BodyBegin}{testString}{HtmlStrings.BodyEnd}");
             };
 
             var cts = new CancellationTokenSource();
@@ -83,7 +83,8 @@ namespace Tests
                     Input = inFile,
                     Output = outFile,
                     Overwrite = false,
-                    Cts = cts
+                    Cts = cts,
+                    HtmlIntermediate = Path.ChangeExtension(outFile, "html"),
                 })
                 .AddLogging()
                 .BuildServiceProvider()
@@ -140,7 +141,7 @@ namespace Tests
 
                 body.InSequence(seq)
                     .Setup(bb => bb.RenderedHtml)
-                    .Returns("<body><p>Hello, world</p></body>");
+                    .Returns(HtmlStrings.BodyBegin + "Hello, world" + HtmlStrings.BodyEnd);
             };
 
             var cts = new CancellationTokenSource();
@@ -154,7 +155,8 @@ namespace Tests
                     Input = inFile,
                     Output = outFile,
                     Overwrite = false,
-                    Cts = cts
+                    Cts = cts,
+                    HtmlIntermediate = Path.ChangeExtension(outFile, "html"),
                 })
                 .AddLogging()
                 .BuildServiceProvider()
@@ -217,7 +219,7 @@ namespace Tests
 
                 body.InSequence(seq)
                     .Setup(bb => bb.RenderedHtml)
-                    .Returns("<body>Hello, world</body>");
+                    .Returns(HtmlStrings.BodyBegin + "Hello, world" + HtmlStrings.BodyEnd);
             };
 
             var cts = new CancellationTokenSource();
@@ -231,7 +233,8 @@ namespace Tests
                     Input = inFile,
                     Output = outFile,
                     Overwrite = false,
-                    Cts = cts
+                    Cts = cts,
+                    HtmlIntermediate = Path.ChangeExtension(outFile, "html"),
                 })
                 .AddLogging()
                 .BuildServiceProvider()
