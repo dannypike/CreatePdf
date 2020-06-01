@@ -17,29 +17,62 @@
         PdfErrors StartBody();
 
         /// <summary>
-        ///
+        /// Insert a blank space to start a new paragraph
         /// </summary>
         /// <returns>this version always returns PdfErrors.Success/></returns>
         PdfErrors NewParagraph();
 
+        /// <summary>
+        /// Justify the text on the right-hand-side of the page
+        /// </summary>
+        /// <seealso cref="CancelJustify"/>
+        /// <returns>this version always returns PdfErrors.Success/></returns>
         PdfErrors RightJustify();
 
+        /// <summary>
+        /// Cancel right-side justification.
+        /// 
+        /// <seealso cref="RightJustify"/>
+        /// </summary>
+        /// <returns>this version always returns PdfErrors.Success/></returns>.
         PdfErrors CancelJustify();
 
+        /// <summary>
+        /// Cancel <see cref="ItalicText"/> and <see cref="BoldText"/>.
+        /// </summary>
+        /// <returns>this version always returns PdfErrors.Success/></returns>.
         PdfErrors NormalText();
 
+        /// <summary>
+        /// The following text is to be displayed in <em>italics</em>.
+        /// </summary>
+        /// <returns>this version always returns PdfErrors.Success/></returns>.
         PdfErrors ItalicText();
 
+        /// <summary>
+        /// The following text is to be displayed in <b>bold</b>.
+        /// </summary>
+        /// <returns>this version always returns PdfErrors.Success/></returns>
         PdfErrors BoldText();
 
+        /// <summary>
+        /// Left-indent the following paragraphs.
+        /// </summary>
+        /// <param name="increment">The amount of indentation to add.</param>
+        /// <returns>this version always returns PdfErrors.Success/></returns>
         PdfErrors Indent(int increment);
 
+        /// <summary>
+        /// Add some more text to the current paragraph.
+        /// </summary>
+        /// <param name="text">Text to be added. Any leading or trailing whitespace is ignored.</param>
+        /// <returns>this version always returns PdfErrors.Success/></returns>
         PdfErrors AddText(string text);
 
         /// <summary>
         /// Builds an Html string from the elements that have been added
         /// </summary>
-        /// <returns></returns>
+        /// <returns>this version always returns PdfErrors.Success/></returns>
         PdfErrors Render();
 
         /// <summary>

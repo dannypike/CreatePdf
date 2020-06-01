@@ -29,6 +29,11 @@ namespace PdfBuilder
         public CancellationTokenSource Cts { get; set; }
 
         /// <summary>
+        /// <see cref="IPdfBuilderOptions.HtmlIntermediate"/>
+        /// </summary>
+        public string HtmlIntermediate { get; set; }
+
+        /// <summary>
         /// Default constructor for setting the options explicitly
         /// </summary>
         public PdfBuilderOptions()

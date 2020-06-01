@@ -5,10 +5,18 @@ using System.Web;
 
 namespace PdfBuilder
 {
+    /// <summary>
+    /// <see cref="IHtmlBody"/>
+    /// </summary>
     public class HtmlBody : IHtmlBody
     {
         public ILogger<IHtmlBody> log_;
-
+        /// <summary>
+        /// An implementation of <see cref="IHtmlBody"/>.
+        /// 
+        /// The constructor prepares the HTML with a suitable font-size
+        /// </summary>
+        /// <param name="logger">(optional) logger for outputting status messages</param>
         public HtmlBody(ILogger<IHtmlBody> logger)
         {
             log_ = logger;
@@ -17,6 +25,9 @@ namespace PdfBuilder
             sb_.Append("<body><div style=\"font-size:16pt;\"><p>");
         }
 
+        /// <summary>
+        /// <see cref="IHtmlBody.AddText(string)"/>
+        /// </summary>
         public PdfErrors AddText(string text)
         {
             if (!string.IsNullOrEmpty(text))
@@ -32,6 +43,9 @@ namespace PdfBuilder
             return PdfErrors.Success;
         }
 
+        /// <summary>
+        /// <see cref="IHtmlBody.BoldText()"/>
+        /// </summary>
         public PdfErrors BoldText()
         {
             if (!bold_)
@@ -45,6 +59,9 @@ namespace PdfBuilder
             return PdfErrors.Success;
         }
 
+        /// <summary>
+        /// <see cref="IHtmlBody.CancelJustify()"/>
+        /// </summary>
         public PdfErrors CancelJustify()
         {
             if (justifying_)
@@ -56,6 +73,9 @@ namespace PdfBuilder
             return PdfErrors.Success;
         }
 
+        /// <summary>
+        /// <see cref="IHtmlBody.Indent(int)"/>
+        /// </summary>
         public PdfErrors Indent(int increment)
         {
             if (indentation_ != 0)
@@ -76,6 +96,9 @@ namespace PdfBuilder
             return PdfErrors.Success;
         }
 
+        /// <summary>
+        /// <see cref="IHtmlBody.ItalicText()"/>
+        /// </summary>
         public PdfErrors ItalicText()
         {
             if (!italic_)
@@ -89,6 +112,9 @@ namespace PdfBuilder
             return PdfErrors.Success;
         }
 
+        /// <summary>
+        /// <see cref="IHtmlBody.NewParagraph()"/>
+        /// </summary>
         public PdfErrors NewParagraph()
         {
             sb_.Append("</p><p>");
@@ -96,6 +122,9 @@ namespace PdfBuilder
             return PdfErrors.Success;
         }
 
+        /// <summary>
+        /// <see cref="IHtmlBody.NormalText()"/>
+        /// </summary>
         public PdfErrors NormalText()
         {
             if (italic_)
@@ -111,6 +140,9 @@ namespace PdfBuilder
             return PdfErrors.Success;
         }
 
+        /// <summary>
+        /// <see cref="IHtmlBody.Render()"/>
+        /// </summary>
         public PdfErrors Render()
         {
             // Terminate the HTML document
@@ -127,6 +159,9 @@ namespace PdfBuilder
             return PdfErrors.Success;
         }
 
+        /// <summary>
+        /// <see cref="IHtmlBody.RightJustify()"/>
+        /// </summary>
         public PdfErrors RightJustify()
         {
             // .fill is idempotent
@@ -139,8 +174,14 @@ namespace PdfBuilder
             return PdfErrors.Success;
         }
 
+        /// <summary>
+        /// <see cref="IHtmlBody.RenderedHtml"/>
+        /// </summary>
         public string RenderedHtml { get; private set; }
 
+        /// <summary>
+        /// <see cref="IHtmlBody.StartBody()"/>
+        /// </summary>
         public PdfErrors StartBody()
         {
             if (heading_)
@@ -156,6 +197,9 @@ namespace PdfBuilder
             return PdfErrors.Success;
         }
 
+        /// <summary>
+        /// <see cref="IHtmlBody.StartHeading()"/>
+        /// </summary>
         public PdfErrors StartHeading()
         {
             if (!heading_)

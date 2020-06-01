@@ -27,5 +27,11 @@ namespace PdfBuilder.Abstractions
         /// being used.
         /// </summary>
         CancellationTokenSource Cts { get; set; }
+
+        /// <summary>
+        /// Setting this to the name of a file will cause PdfBuilder to save the HTML
+        /// string that it builds to that file.
+        /// </summary>
+        string HtmlIntermediate { get; set; }
     }
 }
