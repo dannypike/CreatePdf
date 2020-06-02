@@ -1,33 +1,29 @@
 ﻿namespace PdfBuilder.Abstractions
 {
+    /// <summary>
+    /// This Model holds the HTML objects that are used to build the
+    /// HTML string to pass to IronPDF.
+    /// </summary>
     public interface IHtmlBody
     {
         /// <summary>
-        /// Adds an &lt;h1&gt; element to start building a heading (text in a large font).
-        /// Has no effect if already building a heading.        ///
+        /// Returns the Html string that was created by <see cref="Render()"/>. Is
+        /// null if Render() failed or has not been called.
         /// </summary>
-        /// <returns>this version always returns PdfErrors.Success/></returns>
-        PdfErrors StartHeading();
+        string RenderedHtml { get; }
 
         /// <summary>
-        /// Fnishes building a heading and reverts to building body text.
-        /// Has no effect if not building a heading.
+        /// Add some more text to the current paragraph.
         /// </summary>
-        /// <returns>this version always returns PdfErrors.Success</returns>
-        PdfErrors StartBody();
+        /// <param name="text">Text to be added. Any leading or trailing whitespace is ignored.</param>
+        /// <returns>this version always returns PdfErrors.Success/></returns>
+        PdfErrors AddText(string text);
 
         /// <summary>
-        /// Insert a blank space to start a new paragraph
+        /// The following text is to be displayed in <b>bold</b>.
         /// </summary>
         /// <returns>this version always returns PdfErrors.Success/></returns>
-        PdfErrors NewParagraph();
-
-        /// <summary>
-        /// Justify the text on the right-hand-side of the page
-        /// </summary>
-        /// <seealso cref="CancelJustify"/>
-        /// <returns>this version always returns PdfErrors.Success/></returns>
-        PdfErrors RightJustify();
+        PdfErrors BoldText();
 
         /// <summary>
         /// Cancel right-side justification.
@@ -38,10 +34,11 @@
         PdfErrors CancelJustify();
 
         /// <summary>
-        /// Cancel <see cref="ItalicText"/> and <see cref="BoldText"/>.
+        /// Left-indent the following paragraphs.
         /// </summary>
-        /// <returns>this version always returns PdfErrors.Success/></returns>.
-        PdfErrors NormalText();
+        /// <param name="increment">The amount of indentation to add.</param>
+        /// <returns>this version always returns PdfErrors.Success/></returns>
+        PdfErrors Indent(int increment);
 
         /// <summary>
         /// The following text is to be displayed in <em>italics</em>.
@@ -50,24 +47,16 @@
         PdfErrors ItalicText();
 
         /// <summary>
-        /// The following text is to be displayed in <b>bold</b>.
+        /// Insert a blank space to start a new paragraph
         /// </summary>
         /// <returns>this version always returns PdfErrors.Success/></returns>
-        PdfErrors BoldText();
+        PdfErrors NewParagraph();
 
         /// <summary>
-        /// Left-indent the following paragraphs.
+        /// Cancel <see cref="ItalicText"/> and <see cref="BoldText"/>.
         /// </summary>
-        /// <param name="increment">The amount of indentation to add.</param>
-        /// <returns>this version always returns PdfErrors.Success/></returns>
-        PdfErrors Indent(int increment);
-
-        /// <summary>
-        /// Add some more text to the current paragraph.
-        /// </summary>
-        /// <param name="text">Text to be added. Any leading or trailing whitespace is ignored.</param>
-        /// <returns>this version always returns PdfErrors.Success/></returns>
-        PdfErrors AddText(string text);
+        /// <returns>this version always returns PdfErrors.Success/></returns>.
+        PdfErrors NormalText();
 
         /// <summary>
         /// Builds an Html string from the elements that have been added
@@ -76,9 +65,24 @@
         PdfErrors Render();
 
         /// <summary>
-        /// Returns the Html string that was created by <see cref="Render()"/>. Is
-        /// null if Render() failed or has not been called.
+        /// Justify the text on the right-hand-side of the page
         /// </summary>
-        string RenderedHtml { get; }
+        /// <seealso cref="CancelJustify"/>
+        /// <returns>this version always returns PdfErrors.Success/></returns>
+        PdfErrors RightJustify();
+
+        /// <summary>
+        /// Fnishes building a heading and reverts to building body text.
+        /// Has no effect if not building a heading.
+        /// </summary>
+        /// <returns>this version always returns PdfErrors.Success</returns>
+        PdfErrors StartBody();
+
+        /// <summary>
+        /// Adds an &lt;h1&gt; element to start building a heading (text in a large font).
+        /// Has no effect if already building a heading.        ///
+        /// </summary>
+        /// <returns>this version always returns PdfErrors.Success/></returns>
+        PdfErrors StartHeading();
     }
 }

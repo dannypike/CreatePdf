@@ -1,5 +1,6 @@
-﻿**/.vs/
+**/.vs/
 **/bin/
 **/obj/
 **/outputs/
 **/Tests/inputs/
+PdfBuilder.Abstractions/PdfBuilder.Abstractions.xml

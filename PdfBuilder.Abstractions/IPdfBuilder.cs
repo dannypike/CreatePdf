@@ -3,6 +3,10 @@ using System;
 
 namespace PdfBuilder.Abstractions
 {
+    /// <summary>
+    /// The definition of the API for the root object that creates PDF files
+    /// from an input "command" file.
+    /// </summary>
     public interface IPdfBuilder : IHostedService
     {
         /// <summary>

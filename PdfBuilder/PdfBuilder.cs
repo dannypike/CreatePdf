@@ -80,7 +80,7 @@ namespace PdfBuilder
                 if (options_?.Output == null)
                 {
                     log_?.LogError("invalid output file");
-                    return PdfErrors.InvalidOutputFile;
+                    return PdfErrors.MissingOutputFile;
                 }
 
                 // We do not override output files (for safety)
@@ -194,7 +194,7 @@ namespace PdfBuilder
                 return PdfErrors.Cancelled;
             }
             log_.LogInformation($"writing PDF to output file {options_.Output}");
-            return pdf.TrySaveAs(options_.Output) ? PdfErrors.Success : PdfErrors.IronFailed;
+            return pdf.TrySaveAs(options_.Output) ? PdfErrors.Success : PdfErrors.WriteFailed;
         }
 
         /// <summary>

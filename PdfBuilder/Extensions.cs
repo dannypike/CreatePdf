@@ -7,24 +7,6 @@ namespace PdfBuilder
     public static class Extensions
     {
         /// <summary>
-        /// Add the Transient to the IServiceCollection, if an implementation is not already present
-        /// </summary>
-        /// <typeparam name="SERV">The abstract class to register for DI</typeparam>
-        /// <typeparam name="IMPL">The implementation class for <see cref="SERV"/></typeparam>
-        /// <param name="services">The IServiceCollection to be updated with the implementation definition</param>
-        /// <returns></returns>
-        private static IServiceCollection SafeAddTransient<SERV, IMPL>(this IServiceCollection services)
-            where SERV : class
-            where IMPL: class, SERV
-        {
-            if (!services.Any(descriptor => descriptor.ServiceType == typeof(SERV)))
-            {
-                services.AddTransient<SERV, IMPL>();
-            }
-            return services;
-        }
-
-        /// <summary>
         /// Initialize the IServiceCollection with the invariant built-in class factories, where the caller
         /// will provide a factory for IPdfBuilderOptions
         /// </summary>
@@ -40,6 +22,24 @@ namespace PdfBuilder
                 .SafeAddTransient<IPdfBuilderResults, PdfBuilderResults>()
                 .SafeAddTransient<IPdfBuilder, Builder>()
                 ;
+            return services;
+        }
+
+        /// <summary>
+        /// Add the Transient to the IServiceCollection, if an implementation is not already present
+        /// </summary>
+        /// <typeparam name="SERV">The abstract class to register for DI</typeparam>
+        /// <typeparam name="IMPL">The implementation class for <see cref="SERV"/></typeparam>
+        /// <param name="services">The IServiceCollection to be updated with the implementation definition</param>
+        /// <returns></returns>
+        private static IServiceCollection SafeAddTransient<SERV, IMPL>(this IServiceCollection services)
+            where SERV : class
+            where IMPL: class, SERV
+        {
+            if (!services.Any(descriptor => descriptor.ServiceType == typeof(SERV)))
+            {
+                services.AddTransient<SERV, IMPL>();
+            }
             return services;
         }
     }
