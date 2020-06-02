@@ -32,6 +32,8 @@ namespace CreatePdf
                         .AddSingleton<IPdfBuilderOptions>(_ => new PdfBuilderOptions(args, cts))
                         .AddSingleton<IHostedService>(_ => _
                             .GetService<IPdfBuilder>()
+                            // IPdfBuilder passes a summary exit code through this handler, taken from
+                            // the FatalErrorCode of the first error that was detected.
                             .RegisterFatalErrorCodeHandler(exitCode => exitCode_ = exitCode)
                             )
                         ;
