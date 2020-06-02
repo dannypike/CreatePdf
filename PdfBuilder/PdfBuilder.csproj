@@ -4,6 +4,10 @@
     <TargetFramework>netstandard2.1</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>D:\work\gml\CreatePdf\PdfBuilder\PdfBuilder.xml</DocumentationFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="IronPdf" Version="2020.3.2" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.4" />
@@ -17,6 +21,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PdfBuilder.Abstractions\PdfBuilder.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>Tests</_Parameter1>
+    </AssemblyAttribute>
   </ItemGroup>
 
 </Project>

@@ -8,7 +8,7 @@ namespace PdfBuilder
     /// <summary>
     /// <see cref="IHtmlBody"/>
     /// </summary>
-    public class HtmlBody : IHtmlBody
+    internal class HtmlBody : IHtmlBody
     {
         /// <summary>
         /// An implementation of <see cref="IHtmlBody"/>.

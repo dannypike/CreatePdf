@@ -3,7 +3,7 @@ using PdfBuilder.Abstractions;
 
 namespace PdfBuilder
 {
-    public class HtmlBodyFactory : IHtmlBodyFactory
+    internal class HtmlBodyFactory : IHtmlBodyFactory
     {
         public HtmlBodyFactory(ILogger<IHtmlBody> logger)
         {

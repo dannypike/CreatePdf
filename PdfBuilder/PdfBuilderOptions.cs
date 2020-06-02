@@ -6,6 +6,11 @@ using System.Threading;
 
 namespace PdfBuilder
 {
+    /// <summary>
+    /// An implementation of <see cref="IPdfBuilderOptions"/> that supports
+    /// setting its properties from command-line arguments for a console
+    /// application.
+    /// </summary>
     public class PdfBuilderOptions : IPdfBuilderOptions
     {
         /// <summary>

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace PdfBuilder
 {
-    public class Builder : IPdfBuilder
+    internal class Builder : IPdfBuilder
     {
         /// <summary>
         /// <see cref="IPdfBuilder.Results"/>
@@ -22,6 +22,19 @@ namespace PdfBuilder
         /// </summary>
         public PdfErrors FatalErrorCode { get => Results?.FatalError?.ErrorCode ?? PdfErrors.Success; }
 
+        /// <summary>
+        /// The root object for parsing command files and generating PDF outputs.
+        /// </summary>
+        /// <param name="options">Supplies all of the information that the <see cref="IPdfBuilder"/> needed
+        /// to produce the PDF file.</param>
+        /// <param name="logger">The debug logger injected from the HostBuilder's IServiceCollection.</param>
+        /// <param name="results">Error messages produced by the <see cref="IPdfBuilder"/> engine.</param>
+        /// <param name="factory">A class factory for creating instances of <see cref="IHtmlBody"/>, which
+        /// is the "engine" that builds the intermediate HTML from the command file before it is passed
+        /// to the PDF renderer.</param>
+        /// <seealso cref="IPdfBuilderOptions"/>
+        /// <seealso cref="IPdfBuilderResults"/>
+        /// <seealso cref="IHtmlBodyFactory"/>
         public Builder(IPdfBuilderOptions options, ILogger<IPdfBuilder> logger
             , IPdfBuilderResults results, IHtmlBodyFactory factory)
         {

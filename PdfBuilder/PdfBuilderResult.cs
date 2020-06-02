@@ -3,7 +3,7 @@
 namespace PdfBuilder
 {
     /// <see cref="IPdfBuilderResult" />
-    public class PdfBuilderResult : IPdfBuilderResult
+    internal class PdfBuilderResult : IPdfBuilderResult
     {
         /// <see cref="IPdfBuilderResult.ErrorCode" />
         public PdfErrors ErrorCode { get; internal set; }

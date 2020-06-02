@@ -5,3 +5,4 @@
 **/Tests/inputs/
 PdfBuilder.Abstractions/PdfBuilder.Abstractions.xml
 CreatePdf.xml
+PdfBuilder/PdfBuilder.xml

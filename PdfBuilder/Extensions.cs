@@ -4,15 +4,18 @@ using System.Linq;
 
 namespace PdfBuilder
 {
+    /// <summary>
+    /// Helper methods for the project
+    /// </summary>
     public static class Extensions
     {
         /// <summary>
         /// Initialize the IServiceCollection with the invariant built-in class factories, where the caller
-        /// will provide a factory for IPdfBuilderOptions
+        /// will provide a factory for IPdfBuilderOptions.
         /// </summary>
-        /// <param name="services">The IServiceCollection to be updated with the
-        /// default PdfBuilder factories, but without any factory for IPdfBuilderOptions</param>
-        /// <returns></returns>
+        /// <param name="services">The IServiceCollection to be updated with some default implementations
+        /// of the CreatePdf interfaces, but without any factory for <see cref="IPdfBuilderOptions"/>.</param>
+        /// <returns>The 'services' argument, for Fluent coding.</returns>
         public static IServiceCollection PdfBuilderBasic(this IServiceCollection services)
         {
             // Add the default HtmlBodyFactopry, if it hasn't already been added
@@ -28,10 +31,10 @@ namespace PdfBuilder
         /// <summary>
         /// Add the Transient to the IServiceCollection, if an implementation is not already present
         /// </summary>
-        /// <typeparam name="SERV">The abstract class to register for DI</typeparam>
-        /// <typeparam name="IMPL">The implementation class for <see cref="SERV"/></typeparam>
-        /// <param name="services">The IServiceCollection to be updated with the implementation definition</param>
-        /// <returns></returns>
+        /// <typeparam name="SERV">The abstract class to register in IServiceCollection.</typeparam>
+        /// <typeparam name="IMPL">The implementation class for SERV.</typeparam>
+        /// <param name="services">The IServiceCollection to be updated with the implementation definition.</param>
+        /// <returns>The 'services' argument, for Fluent coding.</returns>
         private static IServiceCollection SafeAddTransient<SERV, IMPL>(this IServiceCollection services)
             where SERV : class
             where IMPL: class, SERV

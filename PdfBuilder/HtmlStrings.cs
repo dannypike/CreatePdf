@@ -1,6 +1,6 @@
 ﻿namespace PdfBuilder
 {
-    public class HtmlStrings
+    internal class HtmlStrings
     {
         public const string BodyBegin = "<body><div style=\"font-size:16pt;\"><p>";
         public const string BodyEnd = "</p></div></body>";

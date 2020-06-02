@@ -6,7 +6,7 @@ using System.Linq;
 namespace PdfBuilder
 {
     /// <see cref="IPdfBuilderResults" />
-    public class PdfBuilderResults : IPdfBuilderResults
+    internal class PdfBuilderResults : IPdfBuilderResults
     {
         /// <see cref="IPdfBuilderResults.FatalError" />
         public IPdfBuilderResult FatalError
